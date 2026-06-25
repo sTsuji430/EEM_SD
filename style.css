@@ -64,29 +64,29 @@ body.hide-cursor {
 }
 
 .payoff-matrix {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed; /* 2列の幅を完全に均等（480pxずつ）にする */
-    text-align: center;
-    background-color: white;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    border-radius: 12px;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important; /* 2列の幅を完全に均等（480pxずつ）にする */
+    text-align: center !important;
+    background-color: white !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;
+    border-radius: 12px !important;
 }
 
 .payoff-matrix th.top-header {
-    height: 100px;
-    background-color: #f1f3f5;
-    font-size: 22px;
-    padding: 10px;
-    border: 2px solid #ccc;
+    height: 100px !important;
+    background-color: #f1f3f5 !important;
+    font-size: 22px !important;
+    padding: 10px !important;
+    border: 2px solid #ccc !important;
 }
 
 .payoff-matrix td {
-    position: relative; /* 左側に飛び出すラベル用 */
-    height: 150px;
-    font-size: 40px;
-    font-weight: bold;
-    border: 2px solid #ccc;
+    position: relative !important; /* 左側に飛び出すラベル用 */
+    height: 150px !important;
+    font-size: 40px !important;
+    font-weight: bold !important;
+    border: 2px solid #ccc !important;
 }
 
 /* 表の左に飛び出させる「相手の選択 パターン1/2」ラベル */
@@ -118,14 +118,14 @@ body.hide-cursor {
 
 /* 反応後のハイライト（自分の選択・列方向）は青系 */
 .payoff-matrix th.highlight-col, .payoff-matrix td.highlight-col {
-    background-color: #e7f1ff; 
-    border-color: #b8daff;
+    background-color: #e7f1ff !important; 
+    border-color: #b8daff !important;
 }
 
 /* 相手の選択パターン説明時のハイライト（行方向）はオレンジ系 */
 .payoff-matrix th.highlight-row, .payoff-matrix td.highlight-row {
-    background-color: #ffe8d6; 
-    border-color: #ffd8a8;
+    background-color: #ffe8d6 !important; 
+    border-color: #ffd8a8 !important;
 }
 
 /* 視覚多様性に配慮したカラーリング */
