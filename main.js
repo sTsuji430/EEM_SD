@@ -124,7 +124,8 @@ const practice_trials = [
 // ---------------------------------------------------------
 // jsPsych タイムラインの構築
 // ---------------------------------------------------------
-const timeline = [];
+var timeline = []; // varに変更してQualtricsからアクセスしやすくする
+window.experiment_timeline = timeline; // 明示的にグローバルにエクスポート
 
 // jsPsychのボタンクリックを遅延させ、アニメーションを最後まで見せるカスタムボタンHTML
 const custom_btn_html = `<div class="jspsych-btn custom-btn" onclick="var el=this; el.classList.add('pressed'); setTimeout(function(){ el.nextElementSibling.click(); }, 500)">%choice%</div><button style="display:none;" class="jspsych-btn">%choice%</button>`;
@@ -519,7 +520,7 @@ timeline.push({
 });
 
 // ---------------------------------------------------------
-// 終了処理
+// 終了処理と初期化
 // ---------------------------------------------------------
 timeline.push({
     type: 'html-keyboard-response',
@@ -538,16 +539,19 @@ timeline.push({
     fullscreen_mode: false
 });
 
-jsPsych.init({
-    timeline: timeline,
-    on_finish: function() {
-        document.body.innerHTML = `
-            <div style="text-align:center; margin-top:50px; font-family: sans-serif; font-size: 24px;">
-                <h2>データを保存しています...</h2>
-                <p>（この画面はローカル確認用のダミーです）</p>
-                <p>F12キーを押してコンソールから保存されるCSVデータを確認できます。</p>
-            </div>
-        `;
-        console.log(jsPsych.data.get().csv());
-    }
-});
+// Qualtrics環境でない（ローカルでの確認）場合のみ実行
+if (typeof Qualtrics === "undefined") {
+    jsPsych.init({
+        timeline: timeline,
+        on_finish: function() {
+            document.body.innerHTML = `
+                <div style="text-align:center; margin-top:50px; font-family: sans-serif; font-size: 24px;">
+                    <h2>データを保存しています...</h2>
+                    <p>（この画面はローカル確認用のダミーです）</p>
+                    <p>F12キーを押してコンソールから保存されるCSVデータを確認できます。</p>
+                </div>
+            `;
+            console.log(jsPsych.data.get().csv());
+        }
+    });
+}
