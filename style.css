@@ -158,23 +158,24 @@ body.hide-cursor {
 
 /* jsPsych のボタングループを常に画面下部に固定 */
 #jspsych-html-button-response-btngroup {
-    position: fixed;
-    bottom: 2vh;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    text-align: center;
+    position: fixed !important;
+    bottom: 8vh !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    text-align: center !important;
+    z-index: 999 !important;
 }
 
 /* jsPsych のボタンを大きくし、クリック時に押し込まれるアニメーションを追加 */
 .jspsych-btn {
-    font-size: 24px;
-    padding: 15px 30px;
-    margin: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.5s ease, box-shadow 0.5s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    font-size: 24px !important;
+    padding: 15px 30px !important;
+    margin: 10px 20px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: transform 0.5s ease, box-shadow 0.5s ease !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
 }
 
 .jspsych-btn:active, .jspsych-btn.pressed {

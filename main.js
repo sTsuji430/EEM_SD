@@ -183,7 +183,7 @@ const instructions_pages = [
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">相手が上の行である「パターン1」を選んだ場合（<span style="background-color:#ffe8d6; padding:0 5px;">オレンジ色</span>の行）、あなたが選ぶキーによってポイントが以下のように決まります。</p>
-                <ul style="margin-bottom: 0; font-size:20px;">
+                <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
                     <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 8pt、相手は 8pt を獲得。</li>
                     <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 10pt、相手は 2pt を獲得。</li>
                 </ul>
@@ -198,7 +198,7 @@ const instructions_pages = [
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">相手が下の行である「パターン2」を選んだ場合も同様です。</p>
-                <ul style="margin-bottom: 0; font-size:20px;">
+                <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
                     <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 2pt、相手は 10pt を獲得。</li>
                     <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 4pt、相手は 4pt を獲得。</li>
                 </ul>
@@ -213,7 +213,7 @@ const instructions_pages = [
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">逆に、あなたが左の列である <b>[ F ] キー</b> を選んだ場合（<span style="background-color:#e7f1ff; padding:0 5px;">青色</span>の列）、相手の選択によってポイントが以下のように決まります。</p>
-                <ul style="margin-bottom: 0; font-size:20px;">
+                <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
                     <li>相手が「パターン1」を選んでいれば：あなたは 8pt、相手は 8pt を獲得。</li>
                     <li>相手が「パターン2」を選んでいれば：あなたは 2pt、相手は 10pt を獲得。</li>
                 </ul>
@@ -228,7 +228,7 @@ const instructions_pages = [
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">あなたが右の列である <b>[ J ] キー</b> を選んだ場合も同様です。</p>
-                <ul style="margin-bottom: 0; font-size:20px;">
+                <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
                     <li>相手が「パターン1」を選んでいれば：あなたは 10pt、相手は 2pt を獲得。</li>
                     <li>相手が「パターン2」を選んでいれば：あなたは 4pt、相手は 4pt を獲得。</li>
                 </ul>
