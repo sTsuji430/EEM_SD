@@ -40,14 +40,14 @@ body.hide-cursor {
 
 /* 教示の補足テキストなどを画面下部に固定配置する用 */
 .instructions-bottom {
-    position: fixed;
-    bottom: 10vh; /* 表とかぶらないように下げる */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 1000px;
-    text-align: left;
-    font-size: 22px;
+    position: fixed !important;
+    bottom: 20vh !important; /* ボタン（8vh）より上に配置 */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 90% !important;
+    max-width: 1000px !important;
+    text-align: left !important;
+    font-size: 22px !important;
 }
 
 /* 常に絶対中央配置＆境界線の交点を完全な画面中央に揃える */
