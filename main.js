@@ -868,19 +868,19 @@ const practice_trials = [
 // ---------------------------------------------------------
 // jsPsych タイムラインの構築
 // ---------------------------------------------------------
-var timeline = []; // varに変更してQualtricsからアクセスしやすくする
+var timeline = [].concat(eem_timeline, [svo_instructions, svo_procedure]); // EEMとSVOを先頭に結合
 window.experiment_timeline = timeline; // 明示的にグローバルにエクスポート
 
 // jsPsychのボタンクリックを遅延させ、アニメーションを最後まで見せるカスタムボタンHTML
 const custom_btn_html = `<div class="jspsych-btn custom-btn" onclick="var el=this; el.classList.add('pressed'); setTimeout(function(){ el.nextElementSibling.click(); }, 500)">%choice%</div><button style="display:none;" class="jspsych-btn">%choice%</button>`;
 
-// 1. フルスクリーン
-timeline.push({
-    type: 'fullscreen',
-    fullscreen_mode: true,
-    message: '<div style="text-align:left; max-width:800px; margin:0 auto;"><p style="font-size: 24px;">実験を始めます。ボタンをクリックしてフルスクリーンモードにしてください。</p></div>',
-    button_label: 'フルスクリーンで開始'
-});
+// 1. フルスクリーン（EEMの最初で既にフルスクリーンにするためコメントアウト）
+// timeline.push({
+//     type: 'fullscreen',
+//     fullscreen_mode: true,
+//     message: '<div style="text-align:left; max-width:800px; margin:0 auto;"><p style="font-size: 24px;">実験を始めます。ボタンをクリックしてフルスクリーンモードにしてください。</p></div>',
+//     button_label: 'フルスクリーンで開始'
+// });
 
 // 2. 教示 1: ルール説明
 timeline.push({
