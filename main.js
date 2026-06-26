@@ -1,32 +1,77 @@
 // =========================================================
+// Shared Components
+// =========================================================
+const custom_btn_html = `<div class="custom-btn-visual" onclick="event.stopPropagation(); if(this.dataset.clicked) return; this.dataset.clicked='1'; var el=this; el.classList.add('pressed'); setTimeout(function(){ el.nextElementSibling.click(); }, 800)">%choice%</div><button style="display:none;" class="jspsych-btn">%choice%</button>`;
+
+const sd_fixation = {
+    type: 'html-keyboard-response',
+    stimulus: '<div class="fixation-cross">+</div>',
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 500,
+    data: { task: 'fixation' }
+};
+
+const blank = {
+    type: 'html-keyboard-response',
+    stimulus: '',
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 500,
+    data: { task: 'blank' }
+};
+
+const post_highlight_blank = {
+    type: 'html-keyboard-response',
+    stimulus: '',
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 500,
+    data: { task: 'post_blank' }
+};
+
+// =========================================================
 // EEM & SVO Blocks (Imported from EEM_experiment)
 // =========================================================
 var repo_site = "https://stsuji430.github.io/EEM_SD/";
 
 // 1. 各ブロックの教示文を生成する関数（全体の教示は分離）
-function get_eem_instruction_html(right_self, right_partner, is_unequal) {
-    var html = '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
-    if (!is_unequal) {
-        html += '<div style="padding: 15px; background-color: #e9ecef; border-left: 5px solid #007bff; margin-bottom: 20px;">' +
-            '<p style="font-size: 20px; margin: 0; font-weight: bold; color: #0056b3;">新しいブロック（10問）が始まります。</p>' +
-            '<p style="margin: 15px 0 0 0; line-height: 1.8;">左側の分配総額は順に変わりますが、ふたりとも<strong>同じ金額</strong>が与えられます。<br>' +
-            '右側の金額はいつも同じですが、ふたりの分配額は<strong>異なっています</strong>。</p>' +
-            '<p style="margin: 15px 0 0 0;">このブロックでは、右側の配分として具体的に以下の金額が固定して提示されます。</p>' +
-            '<div style="font-size: 24px; margin: 10px 0 0 20px; line-height: 1.5; width: 220px;">' +
-            '<div style="display: flex; justify-content: space-between;"><span>あなた:</span><span><strong>' + right_self + '</strong>円</span></div>' +
-            '<div style="display: flex; justify-content: space-between;"><span>Aさん:</span><span><strong>' + right_partner + '</strong>円</span></div>' +
-            '</div>' +
-            '</div>' +
-            '<p>左右の金額をよく見比べて、好ましいと思う方を選んでください。</p>';
+var eem_equal_left = Math.random() < 0.5;
+
+function create_block_stimulus(eq_val, un_s, un_o) {
+    if (eem_equal_left) {
+        return create_eem_stimulus(eq_val, eq_val, un_s, un_o);
     } else {
-        html += '<div style="padding: 15px; background-color: #e9ecef; border-left: 5px solid #28a745; margin-bottom: 20px;">' +
-            '<p style="font-size: 20px; margin: 0; font-weight: bold; color: #155724;">新しいブロック（12問）が始まります。</p>' +
-            '<p style="margin: 10px 0 0 0;">このブロックでは、金額の組み合わせのルールがこれまでとは異なります。<br>左右それぞれの金額が両方とも変化します。</p>' +
-            '</div>' +
-            '<p>左右の金額をよく見比べて、好ましいと思う方を選んでください。</p>';
+        return create_eem_stimulus(un_s, un_o, eq_val, eq_val);
     }
-    html += '<p style="margin-top: 40px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して進んでください。</p>';
-    html += '</div>';
+}
+
+function get_eem_instruction_html(right_self, right_partner, is_unequal) {
+    let eq_side = eem_equal_left ? '左側' : '右側';
+    let un_side = eem_equal_left ? '右側' : '左側';
+
+    let html = `<div class="instructions">`;
+
+    if (!is_unequal) {
+        html += `
+            <h2 style="color: #0056b3; border-bottom-color: #0056b3;">新しいブロック（10問）が始まります</h2>
+            <p style="margin: 15px 0 0 0; line-height: 1.8;">${eq_side}の分配総額は毎回変わりますが、ふたりとも<strong>同じ金額</strong>が与えられます。<br>
+            ${un_side}の金額はいつも同じですが、ふたりの分配額は<strong>異なっています</strong>。</p>
+            <p style="margin: 15px 0 0 0;">このブロックでは、${un_side}の分配として具体的に以下の金額が固定して提示されます。</p>
+            
+            <div style="font-size: 24px; margin: 20px 0 30px 20px; line-height: 1.5; width: 250px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #333;">
+                <div style="display: flex; justify-content: space-between;"><span>あなた:</span><span><strong>${right_self}</strong>円</span></div>
+                <div style="display: flex; justify-content: space-between;"><span>Aさん:</span><span><strong>${right_partner}</strong>円</span></div>
+            </div>
+            
+            <p>左右の金額をよく見比べて、好ましいと思う方を選んでください。</p>
+        `;
+    } else {
+        html += `
+            <h2 style="color: #155724; border-bottom-color: #155724;">新しいブロック（12問）が始まります</h2>
+            <p style="margin: 15px 0 0 0;">このブロックでは、金額の組み合わせのルールがこれまでと少し異なります。<br>左右それぞれの金額が両方とも変化します。</p>
+            <p style="margin-top: 15px;">左右の金額をよく見比べて、好ましいと思う方を選んでください。</p>
+        `;
+    }
+
+    html += `<p style="margin-top: 40px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して開始してください。</p></div>`;
     return html;
 }
 
@@ -35,27 +80,27 @@ function generate_eem_box_html(self_amt, other_amt, key_label, bg_color, border_
     var content = '';
     // 数値が等しい場合は1行、異なる場合（または強制2行フラグがある場合）は2行で表示（高さは108pxで固定）
     if (self_amt === other_amt && !force_two_lines) {
-        content = '<div style="height: 108px; display: flex; align-items: center; justify-content: center; white-space: nowrap;">' +
+        content = '<div style="height: 120px; display: flex; align-items: center; justify-content: center; white-space: nowrap;">' +
             '<span style="margin-right: 5px;">あなたとAさん:</span>' +
-            '<span style="width: 60px; text-align: right; font-weight: bold;">' + self_amt + '</span>円' +
+            '<span style="width: 70px; text-align: right; font-weight: bold;">' + self_amt + '</span>円' +
             '</div>';
     } else {
-        content = '<div style="height: 108px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
-            '<div style="width: 200px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap;">' +
-            '<span>あなた:</span><span><strong style="display: inline-block; width: 60px; text-align: right;">' + self_amt + '</strong>円</span>' +
+        content = '<div style="height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center;">' +
+            '<div style="width: 230px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap;">' +
+            '<span>あなた:</span><span><strong style="display: inline-block; width: 70px; text-align: right;">' + self_amt + '</strong>円</span>' +
             '</div>' +
-            '<div style="width: 200px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap;">' +
-            '<span>Aさん:</span><span><strong style="display: inline-block; width: 60px; text-align: right;">' + other_amt + '</strong>円</span>' +
+            '<div style="width: 230px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap;">' +
+            '<span>Aさん:</span><span><strong style="display: inline-block; width: 70px; text-align: right;">' + other_amt + '</strong>円</span>' +
             '</div>' +
             '</div>';
     }
 
     var footer = '';
     if (key_label) {
-        footer = '<div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; width: 60%;"><span style="font-size: 18px; color: #666;">[' + key_label + ']</span></div>';
+        footer = '<div style="margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; width: 60%;"><span style="font-size: 22px; color: #666; font-weight: bold;">[' + key_label + ']</span></div>';
     }
 
-    return '<div style="padding: 20px; font-size: 24px; line-height: 1.5; width: 280px; border: 2px solid ' + border_color + '; border-radius: 12px; background-color: ' + bg_color + '; ' + (shadow || "") + ' opacity: ' + opacity + '; text-align: center; display: flex; flex-direction: column; align-items: center; transition: all 0.2s;">' +
+    return '<div style="padding: 20px; font-size: 28px; line-height: 1.5; width: 340px; border: 2px solid ' + border_color + '; border-radius: 12px; background-color: ' + bg_color + '; ' + (shadow || "") + ' opacity: ' + opacity + '; text-align: center; display: flex; flex-direction: column; align-items: center; transition: all 0.2s;">' +
         content +
         footer + '</div>';
 }
@@ -87,7 +132,8 @@ var preload_images = {
     type: 'preload',
     images: [
         repo_site + 'image/key_instruction.png',
-        repo_site + 'image/y_o.png'
+        repo_site + 'image/y_o.png',
+        repo_site + 'image/y_o_v2.png'
     ],
     message: '<p>データを読み込んでいます...</p>',
     show_progress_bar: true
@@ -181,45 +227,51 @@ var large_quiz_btn = '<button class="jspsych-btn" style="box-sizing: border-box;
 var layout_quiz_btn = '<button class="jspsych-btn" style="box-sizing: border-box; font-family: inherit; font-weight: bold; font-size: 20px; padding: 15px 40px; margin: 10px 20px; cursor: pointer; width: 680px; max-width: 90vw; transition: all 0.1s;" onmousedown="this.style.backgroundColor=\'#d4edda\'; this.style.borderColor=\'#28a745\'; this.style.transform=\'scale(0.95)\';" onclick="if(this.dataset.clicked) return; this.dataset.clicked=\'1\'; event.stopPropagation(); event.preventDefault(); var btn=this; setTimeout(function(){ btn.click(); }, 500);">%choice%</button>';
 var large_next_btn = '<button class="jspsych-btn" style="box-sizing: border-box; font-family: inherit; font-weight: bold; font-size: 20px; padding: 15px 50px; margin: 20px; cursor: pointer; transition: all 0.1s;" onmousedown="this.style.backgroundColor=\'#d4edda\'; this.style.borderColor=\'#28a745\'; this.style.transform=\'scale(0.95)\';" onclick="if(this.dataset.clicked) return; this.dataset.clicked=\'1\'; event.stopPropagation(); event.preventDefault(); var btn=this; setTimeout(function(){ btn.click(); }, 500);">%choice%</button>';
 
-var imc_quiz_combined = {
+var imc_instruction = {
     type: 'html-button-response',
+    button_html: custom_btn_html,
+    choices: ['確認クイズへ進む'],
     stimulus: function () {
-        // ★冒頭で定義した repo_site と、画像フォルダのパスを結合してURLを作る
-        var img_url = repo_site + "image/y_o.png";
+        return `
+            <div class="instructions">
+                <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題1】が始まります</h1>
+                <p>課題では、次のような場面を思い浮かべて回答をして下さい。<br>あなたが<strong>見知らぬ相手と二人組になった場面</strong>を思い浮かべてください。お互いに匿名です。</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <img src="${repo_site}image/y_o.png" style="max-width: 40%; max-height: 200px; width: auto; height: auto;">
+                </div>
+                <p>この相手との<strong>お金の分配についての決定</strong>を、あなたが行います。</p>
+                <p style="margin-top: 20px; font-weight: bold;">課題の状況を想像できた方は、次のページで確認クイズに回答してください。</p>
+            </div>
+        `;
+    }
+};
 
-        var html = '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
-
-        html += '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #333;">【課題の状況について】</p>';
-        html += '<p style="margin-bottom: 10px;">課題では、次のような場面を思い浮かべて回答をして下さい。<br>あなたが見知らぬ相手と二人組になった場面を思い浮かべてください。お互いに匿名です。</p>';
-
-        // ★画像の上下余白を減らし、縦に大きくなりすぎないよう max-height を追加
-        html += '<div style="text-align: center; margin: 15px 0;">';
-        html += '<img src="' + img_url + '" style="max-width: 40%; max-height: 160px; width: auto; height: auto;">';
-        html += '</div>';
-
-        html += '<p style="margin-bottom: 10px;">この相手とのお金の分配についての決定を、あなたが行います。</p>';
-        html += '<p style="margin-bottom: 10px;">課題の状況を想像できた方は、下の確認クイズに回答してください。<br><strong style="color: #d9534f;">※クイズへの回答は2回までです。</strong></p>';
-
-        // 区切り線の上下余白を 40px から 15px に縮小
-        html += '<hr style="margin: 20px 0; border: 0; border-top: 2px dashed #ccc;">';
-
-        html += '<div style="text-align: left; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #ddd;">';
-        html += '<p style="font-weight: bold; color: #d9534f; margin-bottom: 5px;">【※クイズへの回答は2回までです。2回以上不正解だった場合、次の課題に進みます】</p>';
-        html += '<p style="margin-bottom: 10px;">（' + (imc_fail_count + 1) + '回目）</p>';
-        html += '<p style="font-size: 22px; font-weight: bold; margin: 0; color: #333;">課題で想像する相手は、____である。</p>';
-        html += '</div></div>';
-
-        return html;
-    },
-
+var imc_quiz = {
+    type: 'html-button-response',
+    button_html: custom_btn_html,
     choices: ['よく知っている人', '見知らぬ人'],
-    button_html: large_quiz_btn, // ★大きなボタンを適用
     data: { task: 'imc_quiz' },
+    stimulus: function () {
+        return `
+            <div class="instructions">
+                <h2>【確認クイズ】</h2>
+                <div style="padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #333; margin: 30px 0;">
+                    <p style="font-size: 26px; font-weight: bold; margin: 0 0 20px 0; color: #333;">本実験で登場する相手は、____です。</p>
+                    <p style="color: #666; font-size: 18px; margin: 0;">前のページの説明に基づき、正しいものを選んでください。</p>
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px dashed #ccc;">
+                    <p style="font-weight: bold; color: #d9534f; margin-bottom: 0;">【※クイズへの回答は2回までです。2回以上不正解だった場合、次の課題に進みます】</p>
+                    <p style="margin: 5px 0 0 0; font-weight: bold;">（${imc_fail_count + 1}回目）</p>
+                </div>
+            </div>
+        `;
+    },
     on_finish: function (data) {
         if (data.response === 1) {
             imc_passed = true;
+            data.correct = true;
         } else {
             imc_passed = false;
+            data.correct = false;
             imc_fail_count++;
         }
     }
@@ -227,42 +279,48 @@ var imc_quiz_combined = {
 
 var imc_feedback = {
     type: 'html-button-response',
+    button_html: custom_btn_html,
+    choices: ['次へ進む'],
     stimulus: function () {
-        var html = '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
-
         if (imc_passed) {
-            html += '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #28a745;">正解です！</p>' +
-                '<p>この課題で想像する場面は、<strong>見知らぬ人と2人組になった場面</strong>です。</p>';
+            return `
+                <div class="instructions">
+                    <h2 style="color: #28a745; border-bottom-color: #28a745;">正解です！</h2>
+                    <p>この課題で登場する他者は、<strong>見知らぬ人（Aさん）</strong>です。</p>
+                </div>
+            `;
         } else {
             if (imc_fail_count >= 2) {
-                html += '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #d9534f;">不正解です！</p>' +
-                    '<p>この課題で想像する場面は、<strong>見知らぬ人と2人組になった場面</strong>です。</p>' +
-                    '<p style="color: #d9534f; font-weight: bold; margin-top: 20px;">2回不正解であったため、次のページに進みます。</p>';
+                return `
+                    <div class="instructions">
+                        <h2 style="color: #d9534f; border-bottom-color: #d9534f;">不正解です</h2>
+                        <p>この課題で登場する他者は、<strong>見知らぬ人（Aさん）</strong>です。</p>
+                        <p style="color: #d9534f; font-weight: bold; margin-top: 30px;">2回不正解であったため、次のページへ進みます。</p>
+                    </div>
+                `;
             } else {
-                html += '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #d9534f;">不正解です！</p>' +
-                    '<p>この課題で想像する場面は、<strong>見知らぬ人と2人組になった場面</strong>です。</p>' +
-                    '<p style="margin-top: 20px;">再度確認テストに回答してください。</p>';
+                return `
+                    <div class="instructions">
+                        <h2 style="color: #d9534f; border-bottom-color: #d9534f;">不正解です</h2>
+                        <p>この課題で登場する他者は、<strong>見知らぬ人（Aさん）</strong>です。</p>
+                        <p style="margin-top: 30px; font-weight: bold; color: #d9534f;">もう一度説明を確認してください。</p>
+                    </div>
+                `;
             }
         }
-        html += '</div>';
-        return html;
     },
-    choices: ['次のページに進む'],
-    button_html: large_next_btn, // ★大きな「次へ」ボタンを適用
     on_finish: function () {
         if (!imc_passed && imc_fail_count >= 2) {
             try {
                 Qualtrics.SurveyEngine.setEmbeddedData('imc_failed', '1');
-            } catch (e) { console.log('Qualtrics連携エラー'); }
-
-            // ★ここを追加：残りのタイムラインをすべて飛ばして終了処理へ
-            jsPsych.endExperiment('理解度チェックに2回不正解となったため、次のアンケートへ進みます。');
+            } catch (e) { console.log('Qualtricsへのエラー'); }
+            // jsPsych.endExperiment(...) removed
         }
     }
 };
 
 var imc_loop = {
-    timeline: [imc_quiz_combined, imc_feedback],
+    timeline: [imc_instruction, imc_quiz, imc_feedback],
     loop_function: function () {
         if (imc_passed || imc_fail_count >= 2) { return false; }
         else { return true; }
@@ -273,36 +331,37 @@ var imc_loop = {
 // 2. キーボード操作の教示
 // =========================================================
 var eem_keyboard_instruction = {
-    type: 'html-keyboard-response',
+    type: 'html-button-response',
+    button_html: custom_btn_html,
+    choices: ['次へ進む'],
     stimulus: function () {
-        // 画像のURLを指定
-        var img_url = repo_site + "image/key_instruction.png";
-
-        var html = '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">' +
-            '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #333;">回答方法について</p>' +
-            '<p style="margin-bottom: 10px;">先ほど説明した形式の選択肢が左右に2つ提示されますので、<br>' +
-            'あなたが好ましいと思う方をキーボードのキーを押して選んでください。</p>';
-
-        // ★画像の上下余白を減らし、縦幅の制限 (max-height: 200px) を追加
-        html += '<div style="text-align: center; margin: 10px 0;">';
-        html += '<img src="' + img_url + '" style="max-width: 50%; max-height: 200px; width: auto; height: auto; border: 1px solid #ddd; border-radius: 8px; padding: 5px; background-color: #fff;">';
-        html += '</div>';
-
-        // 枠内の余白（padding）や、上部の空白（margin-top）を縮小
-        html += '<div style="text-align: left; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #ddd;">' +
-            '<strong style="font-size: 20px;">【回答方法】</strong><br>' +
-            '<span style="display: inline-block; margin-top: 5px;">左の分配が好ましい場合は <strong>Fキー</strong> を、右の分配が好ましい場合は <strong>Jキー</strong> を押してください。</span>' +
-            '</div>' +
-            '<p style="margin-top: 20px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して、練習課題へ進んでください。</p>' +
-            '</div>';
-
-        return html;
-    },
-    choices: [' '],
-    on_start: function () {
-        // キーボード操作中（EEM課題中）はマウスカーソルを非表示にする
-        document.body.style.cursor = 'none';
+        return `
+            <div class="instructions">
+                <h2>回答方法について</h2>
+                <p>画面には「あなた」と「Aさん」の2人が受け取る金額の組み合わせが2つ提示されます。</p>
+                <p>あなたは、左右の選択肢のうち、<strong>自分がより好ましいと思う方</strong>を選んでください。</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <img src="${repo_site}image/key_instruction.png" style="max-width: 80%; height: auto;">
+                </div>
+                <p style="font-weight: bold;">
+                    左側の選択肢を選ぶ場合は <span class="key-label">F</span> キー 、 右側の選択肢を選ぶ場合は <span class="key-label">J</span> キー を押して回答してください。
+                </p>
+            </div>
+        `;
     }
+};
+
+var practice_start = {
+    type: 'html-keyboard-response',
+    choices: [' '],
+    stimulus: `
+        <div class="instructions">
+            <h2>練習課題の開始</h2>
+            <p>これより練習課題が始まります。</p>
+            <p>キーボードの <span class="key-label">F</span> と <span class="key-label">J</span> の上に指を置き、準備をしてください。</p>
+            <p style="margin-top: 40px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して練習を開始してください。</p>
+        </div>
+    `
 };
 
 // =========================================================
@@ -315,53 +374,57 @@ var layout_passed = false;
 
 var eem_layout_instruction = {
     type: 'html-button-response',
-    stimulus: function () {
-        return '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto;">' +
-            '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 5px; margin-bottom: 15px; color: #0056b3;">画面の見方について</p>' +
-            '<p style="margin-bottom: 15px;">課題で提示される選択肢には、以下の2通りの表示方法があります。</p>' +
-
-            '<div style="display: flex; justify-content: space-around; align-items: flex-start; margin-bottom: 15px; gap: 20px;">' +
-            '  <div style="text-align: center; flex: 1;">' +
-            '    <p style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">① 金額が異なる場合</p>' +
-            generate_eem_box_html(600, 400, "", "#fff", "#333", "", "1", false) +
-            '    <p style="font-size: 14px; margin-top: 5px; color: #555;">「あなた」と「Aさん」が<br>別々の行に表示されます。</p>' +
-            '  </div>' +
-            '  <div style="text-align: center; flex: 1;">' +
-            '    <p style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">② 金額が同じ場合</p>' +
-            generate_eem_box_html(500, 500, "", "#fff", "#333", "", "1", false) +
-            '    <p style="font-size: 14px; margin-top: 5px; color: #555;">「あなたとAさん」として<br>1行にまとめて表示されます。</p>' +
-            '  </div>' +
-            '</div>' +
-
-            '<div style="background-color: #f8f9fa; padding: 10px 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 17px;">' +
-            '  <p style="margin: 3px 0;"><strong>①の場合：</strong> あなたが <strong>600円</strong>、Aさんが <strong>400円</strong> をもらえます。</p>' +
-            '  <p style="margin: 3px 0;"><strong>②の場合：</strong> あなたとAさんが、<strong>ともに 500円ずつ</strong> もらえます。</p>' +
-            '</div>' +
-            '<p style="margin-bottom: 10px; color: #d9534f; font-weight: bold; font-size: 17px;">※いずれも「それぞれが受け取る金額」であり、2人で分け合うという意味ではありません。</p>' +
-            '<p style="font-weight: bold; color: #333;">確認のため、次のページでクイズに答えてください。</p>' +
-            '</div>';
-    },
+    button_html: custom_btn_html,
     choices: ['確認クイズへ進む'],
-    button_html: large_next_btn
+    stimulus: function () {
+        return `
+            <div class="instructions">
+                <h2>画面の見方について</h2>
+                <p>課題で提示される選択肢には、以下の2通りの表示方法があります。</p>
+                <div style="display: flex; justify-content: center; margin: 30px 0; gap: 60px;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <p style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0;">① 金額が異なる場合</p>
+                        ${generate_eem_box_html(600, 400, "", "#fff", "#333", "", "1", false)}
+                        <p style="font-size: 18px; margin: 15px 0 0 0; color: #555;">「あなた」と「Aさん」が<br>別々の行に表示されます。</p>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <p style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0;">② 金額が同じ場合</p>
+                        ${generate_eem_box_html(500, 500, "", "#fff", "#333", "", "1", false)}
+                        <p style="font-size: 18px; margin: 15px 0 0 0; color: #555;">「あなたとAさん」として<br>1行にまとめて表示されます。</p>
+                    </div>
+                </div>
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border: 2px solid #333; margin-bottom: 20px; font-size: 20px;">
+                    <p style="margin: 5px 0;"><strong>①の場合：</strong> あなたが <strong>600円</strong>、Aさんが <strong>400円</strong> をもらえます。</p>
+                    <p style="margin: 5px 0;"><strong>②の場合：</strong> あなたとAさんが <strong>ともに 500円ずつ</strong> もらえます。</p>
+                </div>
+                <p style="margin-bottom: 20px; color: #d9534f; font-weight: bold;">※いずれも「それぞれが受け取る金額」であり、2人で分け合うという意味ではありません。</p>
+                <p style="font-weight: bold; color: #333;">確認のため、次のページでクイズに答えてください。</p>
+            </div>
+        `;
+    }
 };
 
 var eem_layout_quiz = {
     type: 'html-button-response',
-    stimulus: function () {
-        return '<style>#jspsych-html-button-response-btngroup { display: flex; flex-direction: column; align-items: center; }</style>' +
-            '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">' +
-            '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #333;">【確認クイズ】</p>' +
-            '<div style="display: flex; justify-content: center; margin-bottom: 20px;">' +
-            generate_eem_box_html(500, 500, "", "#fff", "#333", "", "1", false) +
-            '</div>' +
-            '<p style="margin-bottom: 10px;">上の表示はどのような意味でしょうか？正しいものを選んでください。</p>' +
-            '<p style="font-weight: bold; color: #d9534f; margin-bottom: 5px;">【※クイズへの回答は2回までです。2回以上不正解だった場合、次の課題に進みます】</p>' +
-            '<p style="margin-bottom: 10px; font-weight: bold;">（' + (layout_fail_count + 1) + '回目）</p>' +
-            '</div>';
-    },
+    button_html: custom_btn_html,
     choices: ['あなたとAさんが、ともに500円ずつもらえる', '500円を、あなたとAさんの2人で分ける（250円ずつになる）'],
-    button_html: layout_quiz_btn,
     data: { task: 'layout_quiz' },
+    stimulus: function () {
+        return `
+            <style>#jspsych-html-button-response-btngroup { display: flex; flex-direction: column; align-items: center; }</style>
+            <div class="instructions">
+                <h2>【確認クイズ】</h2>
+                <div style="display: flex; justify-content: center; margin: 30px 0;">
+                    ${generate_eem_box_html(500, 500, "", "#fff", "#333", "", "1", false)}
+                </div>
+                <p>上の表示はどのような意味でしょうか？正しいものを選んでください。</p>
+                <div style="padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 2px solid #333; margin-top: 20px;">
+                    <p style="font-weight: bold; color: #d9534f; margin-bottom: 5px;">【※クイズへの回答は2回までです。2回以上不正解だった場合、次の課題に進みます】</p>
+                    <p style="margin: 0; font-weight: bold;">（${layout_fail_count + 1}回目）</p>
+                </div>
+            </div>
+        `;
+    },
     on_finish: function (data) {
         if (data.response === 0) {
             layout_passed = true;
@@ -376,38 +439,41 @@ var eem_layout_quiz = {
 
 var eem_layout_feedback = {
     type: 'html-button-response',
+    button_html: custom_btn_html,
+    choices: ['次へ進む'],
     stimulus: function () {
         if (layout_passed) {
-            return '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 30px;">' +
-                '<p style="font-size: 28px; color: #28a745; font-weight: bold; border-bottom: 2px solid #28a745; padding-bottom: 10px;">正解です！</p>' +
-                '<p>提示される金額は、<strong>それぞれが受け取る金額</strong>を表しています。</p>' +
-                '</div>';
+            return `
+                <div class="instructions">
+                    <h2 style="color: #28a745; border-bottom-color: #28a745;">正解です！</h2>
+                    <p>提示される金額は、<strong>それぞれが受け取る金額</strong>を表しています。</p>
+                </div>
+            `;
         } else {
             if (layout_fail_count >= 2) {
-                return '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 30px;">' +
-                    '<p style="font-size: 28px; color: #d9534f; font-weight: bold; border-bottom: 2px solid #d9534f; padding-bottom: 10px;">不正解です</p>' +
-                    '<p>提示される金額は、<strong>それぞれが受け取る金額</strong>を表しています。<br>（2人で分けるという意味ではありません）</p>' +
-                    '<p style="margin-top: 20px; font-weight: bold; color: #d9534f;">2回不正解であったため、次の課題へ進みます。</p>' +
-                    '</div>';
+                return `
+                    <div class="instructions">
+                        <h2 style="color: #d9534f; border-bottom-color: #d9534f;">不正解です</h2>
+                        <p>提示される金額は、<strong>それぞれが受け取る金額</strong>を表しています。<br>（2人で分けるという意味ではありません）</p>
+                        <p style="margin-top: 30px; font-weight: bold; color: #d9534f;">2回不正解であったため、次の課題へ進みます。</p>
+                    </div>
+                `;
             } else {
-                return '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 30px;">' +
-                    '<p style="font-size: 28px; color: #d9534f; font-weight: bold; border-bottom: 2px solid #d9534f; padding-bottom: 10px;">不正解です</p>' +
-                    '<p>提示される金額は、<strong>それぞれが受け取る金額</strong>を表しています。<br>（2人で分けるという意味ではありませんのでご注意ください。）</p>' +
-                    '<p style="margin-top: 40px; font-weight: bold; color: #d9534f;">もう一度説明を確認してください。</p>' +
-                    '</div>';
+                return `
+                    <div class="instructions">
+                        <h2 style="color: #d9534f; border-bottom-color: #d9534f;">不正解です</h2>
+                        <p>提示される金額は、<strong>それぞれが受け取る金額</strong>を表しています。<br>（2人で分けるという意味ではありませんのでご注意ください。）</p>
+                        <p style="margin-top: 30px; font-weight: bold; color: #d9534f;">もう一度説明を確認してください。</p>
+                    </div>
+                `;
             }
         }
     },
-    choices: ['次へ進む'],
-    button_html: large_next_btn,
     on_finish: function () {
         if (!layout_passed && layout_fail_count >= 2) {
             try {
                 Qualtrics.SurveyEngine.setEmbeddedData('layout_failed', '1');
             } catch (e) { console.log('Qualtrics連携エラー'); }
-
-            // ★ここを追加：残りのタイムラインをすべて飛ばして終了処理へ
-            jsPsych.endExperiment('レイアウト確認に2回不正解となったため、次のアンケートへ進みます。');
         }
     }
 };
@@ -439,10 +505,10 @@ var practice_trial = {
 
 // ★本番のブロック構成（前半は左が平等、後半は両方不平等）に合わせて練習課題を設定
 var practice_stimuli = [
-    create_eem_stimulus(500, 500, 600, 400), // パターンA: 左平等 vs 右不平等（本番の前半と同じ）
-    create_eem_stimulus(300, 300, 700, 500), // パターンA: 左平等 vs 右不平等（本番の前半と同じ）
-    create_eem_stimulus(800, 200, 400, 600, true), // パターンB: 左不平等 vs 右不平等（本番の後半と同じ、強制2行フラグ付き）
-    create_eem_stimulus(300, 700, 700, 300, true)  // パターンB: 左不平等 vs 右不平等（本番の後半と同じ、強制2行フラグ付き）
+    create_block_stimulus(500, 600, 400),
+    create_block_stimulus(300, 700, 500),
+    create_eem_stimulus(800, 200, 400, 600, true),
+    create_eem_stimulus(300, 700, 700, 300, true)
 ];
 
 var practice_procedure = {
@@ -452,18 +518,21 @@ var practice_procedure = {
 
 var practice_end = {
     type: 'html-keyboard-response',
-    stimulus: '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">' +
-        '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #333;">練習が終わりました</p>' +
-        '<p>これより本番が始まります。<br>本番はいくつかのブロックに分かれており、ブロックごとにルールの説明が表示されます。</p>' +
-        '<p style="margin-top: 40px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して本番を開始してください。</p>' +
-        '</div>',
-    choices: [' ']
+    choices: [' '],
+    stimulus: `
+        <div class="instructions">
+            <h2>練習が終わりました</h2>
+            <p>これより本番が始まります。<br>本番はいくつかのブロックに分かれており、ブロックごとにルールの説明が表示されます。</p>
+            <p style="margin-top: 40px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して本番を開始してください。</p>
+        </div>
+    `
 };
 
 // タイムラインへの追加
 eem_timeline.push(imc_loop);
 eem_timeline.push(eem_layout_loop); // クイズをまとめるため、キーボード教示の前に移動
 eem_timeline.push(eem_keyboard_instruction);
+eem_timeline.push(practice_start);
 eem_timeline.push(practice_procedure);
 eem_timeline.push(practice_end);
 
@@ -483,7 +552,7 @@ var right_options = [
 right_options.forEach(function (opt) {
     var block_stimuli = [];
     for (var i = 900; i >= 0; i -= 100) {
-        block_stimuli.push(create_eem_stimulus(i, i, opt.s, opt.o));
+        block_stimuli.push(create_block_stimulus(i, opt.s, opt.o));
     }
 
     eem_blocks.push({
@@ -555,10 +624,9 @@ var svo_instructions = {
     stimulus: function () {
         // ★冒頭で定義した repo_site を使用
         var img_url = repo_site + "image/y_o.png";
+        var html = '<div style="text-align: left; line-height: 1.6; font-size: 24px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
+        html += '<h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題2】が始まります</h1>';
 
-        var html = '<div style="text-align: left; line-height: 1.6; font-size: 18px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
-
-        html += '<p style="font-size: 24px; font-weight: bold; text-align: left; border-bottom: 2px solid currentColor; padding-bottom: 10px; margin-bottom: 20px; color: #333;">【課題３：ポイントの分配】</p>';
         html += '<p style="margin-bottom: 10px; font-weight: bold; color: #d9534f;">（ここからはキーボードではなく、マウスを使って回答します）</p>';
         html += '<p style="margin-bottom: 10px;">この課題も、<strong>あなたが見知らぬ相手と二人組になった状況</strong>を思い浮かべてください。お互いに匿名です。</p>';
 
@@ -588,17 +656,18 @@ var svo_instructions = {
         html += '</div>';
 
         // 例示の部分
-        html += '<div style="background-color: #f8f9fa; border: 1px solid #ddd; padding: 10px 15px; border-radius: 8px; margin-top: 10px; text-align: center;">' +
-            '<p style="margin-bottom: 5px; font-size: 16px; font-weight: bold; text-align: left;">【選択肢の例】</p>' +
+        html += '<div style="background-color: #f8f9fa; border: 2px solid #333; padding: 10px 15px; border-radius: 8px; margin-top: 10px; text-align: center;">' +
+            '<p style="margin-bottom: 5px; font-size: 20px; font-weight: bold; text-align: left;">【選択肢の例】</p>' +
             example_buttons +
-            '<p style="font-size: 16px; margin: 0; text-align: left;">上の例では、<strong>あなたが56ポイント、相手が40ポイントを受け取るような配分</strong>を選択しています。</p>' +
+            '<p style="font-size: 20px; margin: 0; text-align: left;">上の例では、<strong>あなたが56ポイント、相手が40ポイントを受け取るような配分</strong>を選択しています。</p>' +
             '</div>' +
             '</div>';
 
         return html;
     },
     choices: ['次へ進む'],
-    button_html: large_next_btn, // ※定義済みの大きめのボタンを使用
+    button_html: custom_btn_html,
+    button_html: custom_btn_html, // ※定義済みの大きめのボタンを使用
     post_trial_gap: 500 // ボタンを押した後に少し長めのブランクを入れる
 };
 
@@ -656,11 +725,11 @@ for (var j = 0; j < svo_endpoints.length; j++) {
 var svo_trial = {
     type: 'html-button-response',
     stimulus: '<div style="text-align: center; margin-bottom: 30px;">' +
-        '<p style="font-size: 16px; color: #666; margin-bottom: 5px; font-weight: bold;">【あなた と 見知らぬ相手（Aさん） とのポイント分配】</p>' +
+        '<p style="font-size: 20px; color: #666; margin-bottom: 5px; font-weight: bold;">【あなた と 見知らぬ相手（Aさん） とのポイント分配】</p>' +
         '<p style="font-size: 24px; font-weight: bold; margin: 0;">あなたにとって最も好ましい配分を1つ選んでください。</p>' +
         '</div>',
     choices: jsPsych.timelineVariable('choices_array'),
-    button_html: '<button class="jspsych-btn" style="margin: 0 4px; padding: 0; border: none; background: none; cursor: pointer;">%choice%</button>',
+    button_html: '<button class="svo-btn" style="margin: 0; padding: 0; border: none; background: none; cursor: pointer; outline: none;">%choice%</button>',
     data: {
         task: 'svo',
         item_number: jsPsych.timelineVariable('item_number')
@@ -680,12 +749,12 @@ var svo_feedback = {
     type: 'html-button-response',
     stimulus: function () {
         return '<div style="text-align: center; margin-bottom: 30px;">' +
-            '<p style="font-size: 16px; color: #666; margin-bottom: 5px; font-weight: bold;">【あなた と 見知らぬ相手（Aさん） とのポイント分配】</p>' +
+            '<p style="font-size: 20px; color: #666; margin-bottom: 5px; font-weight: bold;">【あなた と 見知らぬ相手（Aさん） とのポイント分配】</p>' +
             '<p style="font-size: 24px; font-weight: bold; margin: 0;">あなたにとって最も好ましい配分を1つ選んでください。</p>' +
             '</div>';
     },
     choices: jsPsych.timelineVariable('choices_array'),
-    button_html: '<button class="jspsych-btn" style="margin: 0 4px; padding: 0; border: none; background: none; cursor: default;">%choice%</button>',
+    button_html: '<button class="svo-btn" style="margin: 0; padding: 0; border: none; background: none; cursor: default; outline: none;">%choice%</button>',
     trial_duration: 500,
     response_ends_trial: false,
     on_load: function () {
@@ -761,28 +830,28 @@ const hgPairs = [
 function createPayoffMatrix(gameType, mult1, mult2) {
     const vals1 = base.map(v => v * mult1);
     const vals2 = base.map(v => v * mult2);
-    
+
     let p1 = {}, p2 = {};
     if (gameType === 'PD') {
-        p1 = {T: vals1[0], R: vals1[1], P: vals1[2], S: vals1[3]};
-        p2 = {T: vals2[0], R: vals2[1], P: vals2[2], S: vals2[3]};
+        p1 = { T: vals1[0], R: vals1[1], P: vals1[2], S: vals1[3] };
+        p2 = { T: vals2[0], R: vals2[1], P: vals2[2], S: vals2[3] };
     } else if (gameType === 'SH') {
-        p1 = {R: vals1[0], T: vals1[1], P: vals1[2], S: vals1[3]};
-        p2 = {R: vals2[0], T: vals2[1], P: vals2[2], S: vals2[3]};
+        p1 = { R: vals1[0], T: vals1[1], P: vals1[2], S: vals1[3] };
+        p2 = { R: vals2[0], T: vals2[1], P: vals2[2], S: vals2[3] };
     } else if (gameType === 'CH') {
-        p1 = {T: vals1[0], R: vals1[1], S: vals1[2], P: vals1[3]};
-        p2 = {T: vals2[0], R: vals2[1], S: vals2[2], P: vals2[3]};
+        p1 = { T: vals1[0], R: vals1[1], S: vals1[2], P: vals1[3] };
+        p2 = { T: vals2[0], R: vals2[1], S: vals2[2], P: vals2[3] };
     } else if (gameType === 'HG') {
-        p1 = {R: vals1[0], T: vals1[1], S: vals1[2], P: vals1[3]};
-        p2 = {R: vals2[0], T: vals2[1], S: vals2[2], P: vals2[3]};
+        p1 = { R: vals1[0], T: vals1[1], S: vals1[2], P: vals1[3] };
+        p2 = { R: vals2[0], T: vals2[1], S: vals2[2], P: vals2[3] };
     }
-    return {p1, p2};
+    return { p1, p2 };
 }
 
 // 動的HTML生成（「あなた」「相手」のラベル付きで黒字の数字を描画）
 function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null) {
     const p = createPayoffMatrix(game, m_self, m_other);
-    
+
     function makeCell(valSelf, valOther) {
         return `
             <div style="display: flex; justify-content: space-evenly; align-items: center; width: 100%; height: 100%;">
@@ -791,7 +860,7 @@ function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null)
                     <div style="color: #000; line-height: 1;">${valSelf}<span style="font-size: 24px; font-weight: normal; margin-left: 2px;">pt</span></div>
                 </div>
                 <div style="text-align: center;">
-                    <div style="font-size: 20px; font-weight: normal; color: #555; margin-bottom: 5px; line-height: 1;">相手</div>
+                    <div style="font-size: 20px; font-weight: normal; color: #555; margin-bottom: 5px; line-height: 1;">Bさん</div>
                     <div style="color: #000; line-height: 1;">${valOther}<span style="font-size: 24px; font-weight: normal; margin-left: 2px;">pt</span></div>
                 </div>
             </div>
@@ -805,10 +874,10 @@ function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null)
 
     const c_f = hl_col === 'f' ? 'highlight-col' : '';
     const c_j = hl_col === 'j' ? 'highlight-col' : '';
-    
+
     const r_1 = hl_row === 1 ? 'highlight-row' : '';
     const r_2 = hl_row === 2 ? 'highlight-row' : '';
-    
+
     return `
     <div class="centered-matrix-wrapper">
       <table class="payoff-matrix">
@@ -818,14 +887,14 @@ function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null)
         </tr>
         <tr class="${r_1}">
           <td class="${c_f} ${r_1}">
-            <div class="row-label">相手の選択<br>パターン1</div>
+            <div class="row-label">Bさんの選択<br>パターン1</div>
             ${cell_CC}
           </td>
           <td class="${c_j} ${r_1}">${cell_CD}</td>
         </tr>
         <tr class="${r_2}">
           <td class="${c_f} ${r_2}">
-            <div class="row-label">相手の選択<br>パターン2</div>
+            <div class="row-label">Bさんの選択<br>パターン2</div>
             ${cell_DC}
           </td>
           <td class="${c_j} ${r_2}">${cell_DD}</td>
@@ -860,9 +929,9 @@ hgPairs.forEach(pair => {
 });
 
 const practice_trials = [
-    {game: 'PD', mult_self: 10, mult_other: 10},
-    {game: 'SH', mult_self: 10, mult_other: 1},
-    {game: 'CH', mult_self: 1, mult_other: 10}
+    { game: 'PD', mult_self: 10, mult_other: 10 },
+    { game: 'SH', mult_self: 10, mult_other: 1 },
+    { game: 'CH', mult_self: 1, mult_other: 10 }
 ];
 
 // ---------------------------------------------------------
@@ -872,7 +941,6 @@ var timeline = [].concat(eem_timeline, [svo_instructions, svo_procedure]); // EE
 window.experiment_timeline = timeline; // 明示的にグローバルにエクスポート
 
 // jsPsychのボタンクリックを遅延させ、アニメーションを最後まで見せるカスタムボタンHTML
-const custom_btn_html = `<div class="jspsych-btn custom-btn" onclick="var el=this; el.classList.add('pressed'); setTimeout(function(){ el.nextElementSibling.click(); }, 500)">%choice%</div><button style="display:none;" class="jspsych-btn">%choice%</button>`;
 
 // 1. フルスクリーン（EEMの最初で既にフルスクリーンにするためコメントアウト）
 // timeline.push({
@@ -886,83 +954,90 @@ const custom_btn_html = `<div class="jspsych-btn custom-btn" onclick="var el=thi
 timeline.push({
     type: 'html-button-response',
     button_html: custom_btn_html,
-    choices: ['理解できたら次へ進む'],
+    choices: ['次へ進む'],
     stimulus: `
         <div class="instructions">
-            <h2>実験の説明</h2>
-            <p>この実験では、あなたと「他の誰か（相手）」による意思決定ゲームを複数回行います。</p>
-            <p>画面には、あなたと相手の選択に応じて、それぞれの「獲得ポイント」が変化する表が表示されます。</p>
-            <p>表には4パターンの結果が存在し、<b>あなたの選択によって相手のポイントが変わり、相手の選択によってあなたのポイントが変わります</b>。</p>
+            <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題3】が始まります</h1>
+            <div style="text-align: center; margin: 10px 0;">
+                <img src="${repo_site}image/y_o_v2.png" style="max-width: 30%; height: auto;">
+            </div>
+            <p style="font-size: 20px; line-height: 1.6; font-weight: bold; margin-bottom: 20px;">この課題では、これまでの課題とは別の参加者（見知らぬ人。ここでは仮に「Bさん」と呼びます）と新たにランダムにペアになり、ポイントの配分を決める意思決定ゲームを複数回行います。</p>
             <p style="color: #dc3545; font-weight: bold; padding: 10px; border: 2px solid #dc3545; border-radius: 8px; background: #fff;">
                 【重要】実験で獲得した最終的なポイントに応じて、参加報酬とは別に追加のボーナス報酬が実際に支払われます。
             </p>
-            <p>相手は、実験終了後に特定の1人にランダムにマッチングされます。</p>
-            <p>他のプレイヤーは完全にランダムで匿名であり、これ以降の関わりはありません。</p>
-            <p>なお、実験中に「相手が何を選んだか」「最終的なポイントはいくつか」といった結果のフィードバックは提示されません。</p>
+            <p>なお、ペアとなる相手は完全に匿名であり、実験中に「相手が何を選んだか」「最終的なポイントはいくつか」といった結果は画面上には提示されません。</p>
+            <p>あなたの選択は、ランダムに選ばれた参加者の選択と照らし合わせられ、お互いの最終的なボーナス報酬額に反映されます。</p>
         </div>
     `
 });
 
 // 3. 教示 2: 利得表の事前説明（ハイライト連動の5ページ）
+const sd_btn_style = '<style>#jspsych-html-button-response-btngroup { position: fixed !important; bottom: 8vh !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; z-index: 999 !important; }</style>';
+
 const instructions_pages = [
     `
-        <div class="instructions-top">
+        ${sd_btn_style}
+        <div class="instructions-top">\n        
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方 (1/5)</h2>
-            <p style="margin-bottom:10px;">実験中は以下のような「ポイントの表」が提示されます。あなたのポイントと相手のポイントは、お互いの選択の組み合わせによって決定されます。</p>
+            <p style="margin-bottom:10px;">実験中は以下のような「ポイントの表」が提示されます。表には4パターンの結果が存在し、<b>あなたの選択によってBさんのポイントが変わり、Bさんの選択によってあなたのポイントが変わります</b>。</p>
         </div>
         ${generateMatrixHTML('PD', 1, 1, null, null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
-                <p style="margin: 0; font-size:20px;">お互いの選択が交差したマスの中にある「あなた」の下の数字があなたのポイント、「相手」の下の数字が相手のポイントになります。<br>次のページから、具体的な見方を説明します。</p>
+                <p style="margin: 0; font-size:20px;">お互いの選択が交差したマスの中にある「あなた」の下の数字があなたのポイント、「Bさん」の下の数字がBさんのポイントになります。<br>次のページから、具体的な見方を説明します。</p>
             </div>
         </div>
     `,
     `
+        ${sd_btn_style}
         <div class="instructions-top">
-            <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：相手が「パターン1」を選んだ場合 (2/5)</h2>
+            <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：Bさんが「パターン1」を選んだ場合 (2/5)</h2>
         </div>
         ${generateMatrixHTML('PD', 1, 1, null, 1)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
-                <p style="margin-top: 0; font-size:20px;">相手が上の行である「パターン1」を選んだ場合（<span style="background-color:#ffe8d6; padding:0 5px;">オレンジ色</span>の行）、あなたが選ぶキーによってポイントが以下のように決まります。</p>
+                <p style="margin-top: 0; font-size:20px;">Bさんが上の行である「パターン1」を選んだ場合（<span style="background-color:#ffe8d6; padding:0 5px;">オレンジ色</span>の行）、あなたが選ぶキーによってポイントが以下のように決まります。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 8pt、相手は 8pt を獲得。</li>
-                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 10pt、相手は 2pt を獲得。</li>
+                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 8pt、Bさんは 8pt を獲得。</li>
+                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 10pt、Bさんは 2pt を獲得。</li>
                 </ul>
             </div>
         </div>
     `,
     `
+        ${sd_btn_style}
         <div class="instructions-top">
-            <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：相手が「パターン2」を選んだ場合 (3/5)</h2>
+            <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：Bさんが「パターン2」を選んだ場合 (3/5)</h2>
         </div>
         ${generateMatrixHTML('PD', 1, 1, null, 2)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
-                <p style="margin-top: 0; font-size:20px;">相手が下の行である「パターン2」を選んだ場合も同様です。</p>
+                <p style="margin-top: 0; font-size:20px;">Bさんが下の行である「パターン2」を選んだ場合も同様です。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 2pt、相手は 10pt を獲得。</li>
-                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 4pt、相手は 4pt を獲得。</li>
+                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 2pt、Bさんは 10pt を獲得。</li>
+                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 4pt、Bさんは 4pt を獲得。</li>
                 </ul>
             </div>
         </div>
     `,
     `
+        ${sd_btn_style}
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：あなたが [ F ] キー を選んだ場合 (4/5)</h2>
         </div>
         ${generateMatrixHTML('PD', 1, 1, 'f', null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
-                <p style="margin-top: 0; font-size:20px;">逆に、あなたが左の列である <b>[ F ] キー</b> を選んだ場合（<span style="background-color:#e7f1ff; padding:0 5px;">青色</span>の列）、相手の選択によってポイントが以下のように決まります。</p>
+                <p style="margin-top: 0; font-size:20px;">逆に、あなたが左の列である <b>[ F ] キー</b> を選んだ場合（<span style="background-color:#e7f1ff; padding:0 5px;">青色</span>の列）、Bさんの選択によってポイントが以下のように決まります。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>相手が「パターン1」を選んでいれば：あなたは 8pt、相手は 8pt を獲得。</li>
-                    <li>相手が「パターン2」を選んでいれば：あなたは 2pt、相手は 10pt を獲得。</li>
+                    <li>Bさんが「パターン1」を選んでいれば：あなたは 8pt、Bさんは 8pt を獲得。</li>
+                    <li>Bさんが「パターン2」を選んでいれば：あなたは 2pt、Bさんは 10pt を獲得。</li>
                 </ul>
             </div>
         </div>
     `,
     `
+        ${sd_btn_style}
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：あなたが [ J ] キー を選んだ場合 (5/5)</h2>
         </div>
@@ -971,8 +1046,8 @@ const instructions_pages = [
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">あなたが右の列である <b>[ J ] キー</b> を選んだ場合も同様です。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>相手が「パターン1」を選んでいれば：あなたは 10pt、相手は 2pt を獲得。</li>
-                    <li>相手が「パターン2」を選んでいれば：あなたは 4pt、相手は 4pt を獲得。</li>
+                    <li>Bさんが「パターン1」を選んでいれば：あなたは 10pt、Bさんは 2pt を獲得。</li>
+                    <li>Bさんが「パターン2」を選んでいれば：あなたは 4pt、Bさんは 4pt を獲得。</li>
                 </ul>
             </div>
         </div>
@@ -983,7 +1058,7 @@ instructions_pages.forEach(page => {
     timeline.push({
         type: 'html-button-response',
         button_html: custom_btn_html,
-        choices: ['理解できたら次へ進む'],
+        choices: ['次へ進む'],
         stimulus: page
     });
 });
@@ -1007,15 +1082,16 @@ const quiz1 = {
     type: 'html-button-response',
     button_html: custom_btn_html,
     stimulus: `
+        ${sd_btn_style}
         <div class="instructions-top">
-            <h2>理解度クイズ (1/2)</h2>
-            <p>以下のポイントの表において、<b>「あなたのポイント」</b>はマスの中の数字のうち、どちらでしょうか？<br>正しいと思う方のボタンをマウスでクリックしてください。</p>
+            <h2>確認クイズ (1/2)</h2>
+            <p>以下のポイントの表において、<b>あなたが「F」キーを選び、Bさんが「パターン2」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
         </div>
         ${generateMatrixHTML('PD', 1, 1, null, null)}
     `,
-    choices: ['左側の「あなた」の下の数字', '右側の「相手」の下の数字'],
+    choices: ['あなた： 2 pt, Bさん： 8 pt', 'あなた： 8 pt, Bさん： 2 pt'],
     data: { is_quiz: true },
-    on_finish: function() {
+    on_finish: function () {
         quiz1_attempts++;
     }
 };
@@ -1023,13 +1099,13 @@ const quiz1 = {
 const quiz1_feedback = {
     type: 'html-button-response',
     button_html: custom_btn_html,
-    stimulus: function() {
+    stimulus: function () {
         const last_resp = jsPsych.data.get().last(1).values()[0].response;
-        if(parseInt(last_resp, 10) === 0) { // 0: 左側
+        if (parseInt(last_resp, 10) === 0) { // 0 is correct
             return `
                 <div class="instructions">
                     <h2 style="color: #28a745;">正解です！</h2>
-                    <p>あなたのポイントは<b>「左側の『あなた』の下の数字」</b>です。</p>
+                    <p>あなたが「F」、Bさんが「パターン2」を選んだ場合、結果は<b>「あなた： 2 pt, Bさん： 8 pt」</b>となります。</p>
                 </div>
             `;
         } else {
@@ -1037,15 +1113,15 @@ const quiz1_feedback = {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「左側の『あなた』の下の数字」</b>です。</p>
-                    <p>これ以上は繰り返さず、次のクイズへ進みます。</p>
+                    <p>※正解は<b>「あなた： 2 pt, Bさん： 8 pt」</b>です。</p>
+                    <p>これ以上の繰り返しはせず、次のクイズへ進みます。</p>
                 </div>
                 `;
             } else {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「左側の『あなた』の下の数字」</b>です。</p>
+                    <p>※正解は<b>「あなた： 2 pt, Bさん： 8 pt」</b>です。</p>
                     <p>もう一度選択してください。</p>
                 </div>
                 `;
@@ -1057,29 +1133,30 @@ const quiz1_feedback = {
 
 timeline.push({
     timeline: [quiz1, quiz1_feedback],
-    loop_function: function(data){
+    loop_function: function (data) {
         const resp = data.values()[0].response;
-        if (parseInt(resp, 10) === 0) return false; // 正解ならループ終了
-        if (quiz1_attempts >= 2) return false; // 2回間違えたらループ強制終了
-        return true; // 1回目の間違いならループ
+        if (parseInt(resp, 10) === 0) return false;
+        if (quiz1_attempts >= 2) return false;
+        return true;
     }
 });
 
-// 5. クイズ 2 (最大2回までループ)
+// 5. クイズ 2
 let quiz2_attempts = 0;
 const quiz2 = {
     type: 'html-button-response',
     button_html: custom_btn_html,
     stimulus: `
+        ${sd_btn_style}
         <div class="instructions-top">
-            <h2>理解度クイズ (2/2)</h2>
-            <p>以下のポイントの表において、<b>「相手のポイント」</b>はマスの中の数字のうち、どちらでしょうか？<br>正しいと思う方のボタンをマウスでクリックしてください。</p>
+            <h2>確認クイズ (2/2)</h2>
+            <p>以下のポイントの表において、<b>あなたが「J」キーを選び、Bさんが「パターン1」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
         </div>
         ${generateMatrixHTML('PD', 1, 1, null, null)}
     `,
-    choices: ['左側の「あなた」の下の数字', '右側の「相手」の下の数字'],
+    choices: ['あなた： 2 pt, Bさん： 8 pt', 'あなた： 8 pt, Bさん： 2 pt'],
     data: { is_quiz: true },
-    on_finish: function() {
+    on_finish: function () {
         quiz2_attempts++;
     }
 };
@@ -1087,13 +1164,13 @@ const quiz2 = {
 const quiz2_feedback = {
     type: 'html-button-response',
     button_html: custom_btn_html,
-    stimulus: function() {
+    stimulus: function () {
         const last_resp = jsPsych.data.get().last(1).values()[0].response;
-        if(parseInt(last_resp, 10) === 1) { // 1: 右側
+        if (parseInt(last_resp, 10) === 1) { // 1 is correct (8pt, 2pt)
             return `
                 <div class="instructions">
                     <h2 style="color: #28a745;">正解です！</h2>
-                    <p>相手のポイントは<b>「右側の『相手』の下の数字」</b>です。</p>
+                    <p>あなたが「J」、Bさんが「パターン1」を選んだ場合、結果は<b>「あなた： 8 pt, Bさん： 2 pt」</b>となります。</p>
                 </div>
             `;
         } else {
@@ -1101,15 +1178,15 @@ const quiz2_feedback = {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「右側の『相手』の下の数字」</b>です。</p>
-                    <p>これ以上は繰り返さず、次に進みます。</p>
+                    <p>※正解は<b>「あなた： 8 pt, Bさん： 2 pt」</b>です。</p>
+                    <p>これ以上の繰り返しはせず、次の課題へ進みます。</p>
                 </div>
                 `;
             } else {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「右側の『相手』の下の数字」</b>です。</p>
+                    <p>※正解は<b>「あなた： 8 pt, Bさん： 2 pt」</b>です。</p>
                     <p>もう一度選択してください。</p>
                 </div>
                 `;
@@ -1121,18 +1198,18 @@ const quiz2_feedback = {
 
 timeline.push({
     timeline: [quiz2, quiz2_feedback],
-    loop_function: function(data){
+    loop_function: function (data) {
         const resp = data.values()[0].response;
-        if (parseInt(resp, 10) === 1) return false; // 正解ならループ終了
-        if (quiz2_attempts >= 2) return false; // 2回間違えたらループ強制終了
-        return true; // 1回目の間違いならループ
+        if (parseInt(resp, 10) === 1) return false;
+        if (quiz2_attempts >= 2) return false;
+        return true;
     }
 });
 
 // 6. ここからマウスカーソルを非表示にする
 timeline.push({
     type: 'call-function',
-    func: function() {
+    func: function () {
         document.body.classList.add('hide-cursor');
     }
 });
@@ -1140,35 +1217,22 @@ timeline.push({
 // ---------------------------------------------------------
 // トライアルコンポーネント (共通)
 // ---------------------------------------------------------
-const sd_fixation = {
-    type: 'html-keyboard-response',
-    stimulus: '<div class="fixation-cross">+</div>',
-    choices: jsPsych.NO_KEYS,
-    trial_duration: 500,
-    data: { task: 'fixation' }
-};
 
-const blank = {
-    type: 'html-keyboard-response',
-    stimulus: '',
-    choices: jsPsych.NO_KEYS,
-    trial_duration: 500,
-    data: { task: 'blank' }
-};
 
 const matrix_trial = {
     type: 'html-keyboard-response',
-    stimulus: function() {
-        return generateMatrixHTML(
+    stimulus: function () {
+        const matrixHTML = generateMatrixHTML(
             jsPsych.timelineVariable('game', true),
             jsPsych.timelineVariable('mult_self', true),
             jsPsych.timelineVariable('mult_other', true),
             null,
             null
         );
+        return '<p style="margin-bottom: 20px; font-size: 28px; font-weight: bold; text-align: center;">どの選択肢を選びますか？<br><span style="font-size: 20px; font-weight: normal; color: #555;">（左なら F キー、右なら J キーを押してください）</span></p>' + matrixHTML;
     },
     choices: ['f', 'j'],
-    data: function() {
+    data: function () {
         return {
             task: 'response',
             game: jsPsych.timelineVariable('game'),
@@ -1181,29 +1245,23 @@ const matrix_trial = {
 
 const highlight_trial = {
     type: 'html-keyboard-response',
-    stimulus: function() {
+    stimulus: function () {
         const last_trial = jsPsych.data.get().last(1).values()[0];
         const choice = last_trial.response;
-        return generateMatrixHTML(
-            last_trial.game,
-            last_trial.mult_self,
-            last_trial.mult_other,
+        const matrixHTML = generateMatrixHTML(
+            jsPsych.timelineVariable('game', true),
+            jsPsych.timelineVariable('mult_self', true),
+            jsPsych.timelineVariable('mult_other', true),
             choice,
             null
         );
+        return '<p style="margin-bottom: 20px; font-size: 28px; font-weight: bold; text-align: center; visibility: hidden;">どの選択肢を選びますか？<br><span style="font-size: 20px; font-weight: normal; color: #555;">（左なら F キー、右なら J キーを押してください）</span></p>' + matrixHTML;
     },
     choices: jsPsych.NO_KEYS,
     trial_duration: 500,
     data: { task: 'highlight' }
 };
 
-const post_highlight_blank = {
-    type: 'html-keyboard-response',
-    stimulus: '',
-    choices: jsPsych.NO_KEYS,
-    trial_duration: 500,
-    data: { task: 'post_blank' }
-};
 
 // ---------------------------------------------------------
 // 練習試行ブロック
@@ -1213,6 +1271,9 @@ timeline.push({
     stimulus: `
         <div class="instructions">
             <h2>練習試行</h2>
+            <div style="text-align: center; margin: 20px 0;">
+                <img src="${repo_site}image/key_instruction.png" style="max-width: 60%; height: auto;">
+            </div>
             <p style="color: #007bff; font-weight: bold; font-size: 24px; padding: 15px; border: 3px solid #007bff; border-radius: 8px; background: #e7f1ff; margin: 30px 0;">
                 【重要】これ以降はマウスを使用しません。<br>すべてキーボード（Fキー、Jキー）のみで操作を行います。
             </p>
@@ -1223,7 +1284,7 @@ timeline.push({
     choices: [' ']
 });
 
-const practice_vars = practice_trials.map(t => ({...t, block_type: 'practice'}));
+const practice_vars = practice_trials.map(t => ({ ...t, block_type: 'practice' }));
 timeline.push({
     timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
     timeline_variables: practice_vars,
@@ -1247,18 +1308,45 @@ timeline.push({
     choices: [' ']
 });
 
-const main_vars = main_trials.map(t => ({...t, block_type: 'main'}));
+const main_vars = main_trials.map(t => ({ ...t, block_type: 'main' }));
+
+// シャッフルして15, 15, 16の3ブロックに分割
+let all_sd_trials = jsPsych.randomization.shuffle(main_vars);
+let sd_block1 = all_sd_trials.slice(0, 15);
+let sd_block2 = all_sd_trials.slice(15, 30);
+let sd_block3 = all_sd_trials.slice(30);
+
+const sd_break = {
+    type: 'html-keyboard-response',
+    stimulus: `
+        <div class="instructions">
+            <h2>休憩</h2>
+            <p>ここで少し休憩をとってください。</p>
+            <p style="margin-top: 40px; font-weight: bold; color: #d9534f;">準備ができたらスペースキーを押して、課題を再開してください。</p>
+        </div>
+    `,
+    choices: [' ']
+};
+
 timeline.push({
     timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
-    timeline_variables: main_vars,
-    randomize_order: true,
-    repetitions: 2
+    timeline_variables: sd_block1
+});
+timeline.push(sd_break);
+timeline.push({
+    timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
+    timeline_variables: sd_block2
+});
+timeline.push(sd_break);
+timeline.push({
+    timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
+    timeline_variables: sd_block3
 });
 
 // 7. マウスカーソルを再表示する
 timeline.push({
     type: 'call-function',
-    func: function() {
+    func: function () {
         document.body.classList.remove('hide-cursor');
     }
 });
@@ -1287,7 +1375,7 @@ timeline.push({
 if (typeof Qualtrics === "undefined") {
     jsPsych.init({
         timeline: timeline,
-        on_finish: function() {
+        on_finish: function () {
             document.body.innerHTML = `
                 <div style="text-align:center; margin-top:50px; font-family: sans-serif; font-size: 24px;">
                     <h2>データを保存しています...</h2>
