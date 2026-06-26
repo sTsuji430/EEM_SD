@@ -1371,11 +1371,20 @@ timeline.push({
     fullscreen_mode: false
 });
 
-// Qualtrics環境でない（ローカルでの確認）場合のみ実行
-if (typeof Qualtrics === "undefined") {
-    jsPsych.init({
-        timeline: timeline,
-        on_finish: function () {
+// QualtricsやIFrame内で実行されているかどうかで処理を分ける
+jsPsych.init({
+    timeline: timeline,
+    on_finish: function () {
+        var datajs = jsPsych.data.get().json();
+        
+        // もしIFrameの中（例：Qualtrics）で動いているなら、親画面にデータを送信する
+        if (window.self !== window.top) {
+            window.parent.postMessage({
+                type: 'jspsych-data',
+                data: datajs
+            }, '*');
+        } else {
+            // ローカル（そのままHTMLを開いた場合）の処理
             document.body.innerHTML = `
                 <div style="text-align:center; margin-top:50px; font-family: sans-serif; font-size: 24px;">
                     <h2>データを保存しています...</h2>
@@ -1385,5 +1394,5 @@ if (typeof Qualtrics === "undefined") {
             `;
             console.log(jsPsych.data.get().csv());
         }
-    });
-}
+    }
+});
