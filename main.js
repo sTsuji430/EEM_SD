@@ -1375,7 +1375,8 @@ timeline.push({
 jsPsych.init({
     timeline: timeline,
     on_finish: function () {
-        var datajs = jsPsych.data.get().json();
+        // 【重要】Qualtricsの2万文字制限を回避するため、無駄に長いHTML文字列（stimulus）を除外する
+        var datajs = jsPsych.data.get().ignore('stimulus').ignore('internal_node_id').json();
         
         // もしIFrameの中（例：Qualtrics）で動いているなら、親画面にデータを送信する
         if (window.self !== window.top) {
