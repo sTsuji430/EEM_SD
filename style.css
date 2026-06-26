@@ -12,7 +12,7 @@ body.hide-cursor {
 
 .instructions {
     text-align: left;
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
     font-size: 22px;
     line-height: 1.8;
@@ -41,7 +41,7 @@ body.hide-cursor {
 /* 教示の補足テキストなどを画面下部に固定配置する用 */
 .instructions-bottom {
     position: fixed !important;
-    bottom: 20vh !important; /* ボタン（8vh）より上に配置 */
+    bottom: 16vh !important; /* ボタン（8vh）より少し上に配置 */
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 90% !important;
@@ -57,10 +57,10 @@ body.hide-cursor {
     top: 50%;
     /* 表の幅が960pxなので、-480pxで水平中心が境界線に一致 */
     margin-left: -480px; 
-    /* ヘッダー100px + データ行150px = 250pxを上にオフセットすると、垂直中心が境界線に一致 */
-    margin-top: -250px;
+    /* ヘッダー70px + データ行125px = 195pxを上にオフセットすると、垂直中心が境界線に一致 */
+    margin-top: -195px;
     width: 960px;
-    height: 400px;
+    height: 320px;
 }
 
 .payoff-matrix {
@@ -74,17 +74,17 @@ body.hide-cursor {
 }
 
 .payoff-matrix th.top-header {
-    height: 100px !important;
+    height: 70px !important;
     background-color: #f1f3f5 !important;
-    font-size: 22px !important;
-    padding: 10px !important;
+    font-size: 20px !important;
+    padding: 5px !important;
     border: 2px solid #ccc !important;
 }
 
 .payoff-matrix td {
     position: relative !important; /* 左側に飛び出すラベル用 */
-    height: 150px !important;
-    font-size: 40px !important;
+    height: 125px !important;
+    font-size: 32px !important;
     font-weight: bold !important;
     border: 2px solid #ccc !important;
 }
@@ -156,29 +156,120 @@ body.hide-cursor {
     font-weight: bold;
 }
 
-/* jsPsych のボタングループを常に画面下部に固定 */
+/* jsPsych のボタングループ (自然な配置に変更) */
 #jspsych-html-button-response-btngroup {
-    position: fixed !important;
-    bottom: 8vh !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    width: 100% !important;
-    text-align: center !important;
-    z-index: 999 !important;
+    margin-top: 40px;
+    text-align: center;
 }
 
 /* jsPsych のボタンを大きくし、クリック時に押し込まれるアニメーションを追加 */
-.jspsych-btn {
+.custom-btn-visual {
+    display: inline-block;
     font-size: 24px !important;
     padding: 15px 30px !important;
     margin: 10px 20px !important;
     border-radius: 8px !important;
+    border: 1px solid transparent;
+    background-color: #fff;
+    border-color: #ccc;
     cursor: pointer !important;
-    transition: transform 0.5s ease, box-shadow 0.5s ease !important;
+    transition: transform 0.5s ease, box-shadow 0.5s ease, background-color 0.1s ease !important;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
 }
 
-.jspsych-btn:active, .jspsych-btn.pressed {
+.custom-btn-visual:active, .custom-btn-visual.pressed {
     transform: scale(0.95);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    background-color: #d4edda !important;
+    border-color: #28a745 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
 }
+
+
+/* jsPsych全体のベース文字サイズを大きくする */
+.jspsych-content {
+    font-size: 20px !important;
+}
+
+/* ========================================================= */
+/* Qualtrics (環境依存) 対策：外部CSSとして読み込ませて一括適用 */
+/* ========================================================= */
+
+/* 1. プレビュー画面やQualtrics本体の画面全体を覆い隠して専用画面にする */
+#display_stage_background {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: #f7f9fa !important;
+    z-index: 99998 !important;
+}
+
+#display_stage {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: transparent !important;
+    z-index: 99999 !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Qualtricsのフォントサイズやレイアウト（Skin）を強制リセット */
+#display_stage * {
+    box-sizing: border-box !important;
+}
+
+#display_stage p, 
+#display_stage div, 
+#display_stage span, 
+#display_stage strong,
+#display_stage button {
+    font-size: inherit !important; /* 親要素のサイズを強制的に引き継ぐ */
+    line-height: inherit !important;
+    font-family: 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* 3. ボタンの枠線や大きさがQualtricsに潰されるのを防ぐ */
+#display_stage .svo-btn {
+    border: none !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    outline: none !important;
+    min-width: unset !important;
+}
+
+/* SVOの選択肢（内側のdiv） */
+#display_stage .svo-btn div {
+    border: 2px solid #333 !important;
+    background-color: #fff !important;
+    width: 80px !important; 
+}
+
+#display_stage .svo-btn span {
+    font-size: 14px !important;
+}
+
+#display_stage .svo-btn strong {
+    font-size: 22px !important;
+}
+
+/* EEM課題等の汎用ボタン */
+#display_stage .custom-btn-visual, 
+#display_stage .jspsych-btn {
+    font-size: 24px !important;
+    padding: 15px 30px !important;
+    margin: 10px 20px !important;
+    border: 1px solid #ccc !important;
+    background-color: #fff !important;
+    border-radius: 8px !important;
+    min-width: unset !important;
+    color: #333 !important;
+    font-weight: bold !important;
+}
+
+
