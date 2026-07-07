@@ -814,22 +814,22 @@ var svo_procedure = {
 
 
 // 1. ベースとなる配列 (v1 > v2 > v3 > v4)
-const base = [8, 6, 4, 2];
+const base = [16, 12, 8, 4];
 
-// 2. 倍率ペアの定義
+// 2. 倍率ペアの定義 (定数c と 倍率m のオブジェクト)
 const dilemmaPairs = [
-    [1, 1], [10, 10], // 対称
-    [4, 3], [3, 2], [2, 1], [3, 1], [5, 1], [10, 1], // 非対称・有利
-    [3, 4], [2, 3], [1, 2], [1, 3], [1, 5], [1, 10]  // 非対称・不利
+    [{c:10, m:1}, {c:10, m:1}], [{c:10, m:2}, {c:10, m:2}], [{c:10, m:3}, {c:10, m:3}],
+    [{c:15, m:1}, {c:15, m:1}], [{c:15, m:2}, {c:15, m:2}], [{c:15, m:3}, {c:15, m:3}], // 対称6パターン
+    [{c:10, m:3}, {c:10, m:2}], [{c:10, m:2}, {c:10, m:3}] // 非対称2パターン
 ];
 
 const hgPairs = [
-    [1, 1], [10, 10], [10, 1], [1, 10]
+    [{c:15, m:3}, {c:15, m:3}] // HG 1パターン (左右反転で2試行になる)
 ];
 
-function createPayoffMatrix(gameType, mult1, mult2) {
-    const vals1 = base.map(v => v * mult1);
-    const vals2 = base.map(v => v * mult2);
+function createPayoffMatrix(gameType, pSelf, pOther) {
+    const vals1 = base.map(v => (v + pSelf.c) * pSelf.m);
+    const vals2 = base.map(v => (v + pOther.c) * pOther.m);
 
     let p1 = {}, p2 = {};
     if (gameType === 'PD') {
@@ -848,8 +848,8 @@ function createPayoffMatrix(gameType, mult1, mult2) {
     return { p1, p2 };
 }
 
-// 動的HTML生成（「あなた」「相手」のラベル付きで黒字の数字を描画）
-function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null) {
+// 動的HTML生成
+function generateMatrixHTML(game, m_self, m_other, swap_lr = false, hl_col = null, hl_row = null) {
     const p = createPayoffMatrix(game, m_self, m_other);
 
     function makeCell(valSelf, valOther) {
@@ -867,10 +867,18 @@ function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null)
         `;
     }
 
-    const cell_CC = makeCell(p.p1.R, p.p2.R);
-    const cell_CD = makeCell(p.p1.T, p.p2.S);
-    const cell_DC = makeCell(p.p1.S, p.p2.T);
-    const cell_DD = makeCell(p.p1.P, p.p2.P);
+    let cell_CC = makeCell(p.p1.R, p.p2.R);
+    let cell_CD = makeCell(p.p1.T, p.p2.S); 
+    let cell_DC = makeCell(p.p1.S, p.p2.T);
+    let cell_DD = makeCell(p.p1.P, p.p2.P);
+
+    let col1_row1 = cell_CC, col2_row1 = cell_CD;
+    let col1_row2 = cell_DC, col2_row2 = cell_DD;
+
+    if (swap_lr) {
+        col1_row1 = cell_CD; col2_row1 = cell_CC;
+        col1_row2 = cell_DD; col2_row2 = cell_DC;
+    }
 
     const c_f = hl_col === 'f' ? 'highlight-col' : '';
     const c_j = hl_col === 'j' ? 'highlight-col' : '';
@@ -888,20 +896,35 @@ function generateMatrixHTML(game, m_self, m_other, hl_col = null, hl_row = null)
         <tr class="${r_1}">
           <td class="${c_f} ${r_1}">
             <div class="row-label">Bさんの選択<br>パターン1</div>
-            ${cell_CC}
+            ${col1_row1}
           </td>
-          <td class="${c_j} ${r_1}">${cell_CD}</td>
+          <td class="${c_j} ${r_1}">${col2_row1}</td>
         </tr>
         <tr class="${r_2}">
           <td class="${c_f} ${r_2}">
             <div class="row-label">Bさんの選択<br>パターン2</div>
-            ${cell_DC}
+            ${col1_row2}
           </td>
-          <td class="${c_j} ${r_2}">${cell_DD}</td>
+          <td class="${c_j} ${r_2}">${col2_row2}</td>
         </tr>
       </table>
     </div>
     `;
+}
+
+// ---------------------------------------------------------
+// 固定シードシャッフル関数
+// ---------------------------------------------------------
+function seededShuffle(array, seed) {
+    let m = array.length, t, i;
+    while (m) {
+        seed = (seed * 9301 + 49297) % 233280;
+        i = Math.floor((seed / 233280) * m--);
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+    }
+    return array;
 }
 
 // ---------------------------------------------------------
@@ -912,66 +935,84 @@ const gameTypes = ['PD', 'SH', 'CH'];
 
 gameTypes.forEach(gt => {
     dilemmaPairs.forEach(pair => {
-        main_trials.push({
-            game: gt,
-            mult_self: pair[0],
-            mult_other: pair[1]
-        });
+        main_trials.push({ game: gt, mult_self: pair[0], mult_other: pair[1], swap_lr: false });
+        main_trials.push({ game: gt, mult_self: pair[0], mult_other: pair[1], swap_lr: true });
     });
 });
 
 hgPairs.forEach(pair => {
-    main_trials.push({
-        game: 'HG',
-        mult_self: pair[0],
-        mult_other: pair[1]
-    });
+    main_trials.push({ game: 'HG', mult_self: pair[0], mult_other: pair[1], swap_lr: false });
+    main_trials.push({ game: 'HG', mult_self: pair[0], mult_other: pair[1], swap_lr: true });
 });
 
+// 第1試行と第50試行のアンカーを抽出
+let anchor_trial_1 = main_trials.find(t => t.game === 'PD' && t.mult_self.c === 10 && t.mult_self.m === 1 && t.mult_other.c === 10 && t.mult_other.m === 1 && !t.swap_lr);
+let anchor_trial_50 = main_trials.find(t => t.game === 'PD' && t.mult_self.c === 10 && t.mult_self.m === 1 && t.mult_other.c === 10 && t.mult_other.m === 1 && t.swap_lr);
+
+// アンカーを除外して残り48試行をシャッフル
+let remaining_trials = main_trials.filter(t => t !== anchor_trial_1 && t !== anchor_trial_50);
+remaining_trials = seededShuffle(remaining_trials, 12345); // 固定シード
+
+// 全50試行を結合
+let all_sd_trials = [anchor_trial_1, ...remaining_trials, anchor_trial_50];
+// プロパティ追加
+all_sd_trials = all_sd_trials.map(t => ({ ...t, block_type: 'main' }));
+
 const practice_trials = [
-    { game: 'PD', mult_self: 10, mult_other: 10 },
-    { game: 'SH', mult_self: 10, mult_other: 1 },
-    { game: 'CH', mult_self: 1, mult_other: 10 }
+    { game: 'PD', mult_self: {c:10, m:2}, mult_other: {c:10, m:2}, swap_lr: false },
+    { game: 'SH', mult_self: {c:15, m:1}, mult_other: {c:15, m:1}, swap_lr: true },
+    { game: 'CH', mult_self: {c:10, m:3}, mult_other: {c:10, m:2}, swap_lr: false }
 ];
 
 // ---------------------------------------------------------
 // jsPsych タイムラインの構築
 // ---------------------------------------------------------
 var timeline = [].concat(eem_timeline, [svo_instructions, svo_procedure]); // EEMとSVOを先頭に結合
-window.experiment_timeline = timeline; // 明示的にグローバルにエクスポート
+window.experiment_timeline = timeline; 
 
-// jsPsychのボタンクリックを遅延させ、アニメーションを最後まで見せるカスタムボタンHTML
-
-// 1. フルスクリーン（EEMの最初で既にフルスクリーンにするためコメントアウト）
-// timeline.push({
-//     type: 'fullscreen',
-//     fullscreen_mode: true,
-//     message: '<div style="text-align:left; max-width:800px; margin:0 auto;"><p style="font-size: 24px;">実験を始めます。ボタンをクリックしてフルスクリーンモードにしてください。</p></div>',
-//     button_label: 'フルスクリーンで開始'
-// });
-
-// 2. 教示 1: ルール説明
-timeline.push({
-    type: 'html-button-response',
-    button_html: custom_btn_html,
-    choices: ['次へ進む'],
-    stimulus: `
+// 2. 教示 1: ルール説明（事後マッチングと報酬に関する3ページ）
+const intro_pages = [
+    `
         <div class="instructions">
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題3】が始まります</h1>
-            <div style="text-align: center; margin: 10px 0;">
-                <img src="${repo_site}image/y_o_v2.png" style="max-width: 30%; height: auto;">
+            <p style="font-size: 20px; line-height: 1.6; font-weight: bold; margin-bottom: 20px;">今から行う課題では、この調査に参加している誰かと2人組になって課題を行います。ただし、リアルタイムに2人組で課題を行うわけではありません。</p>
+            <p style="font-size: 18px; margin-bottom: 20px;">この調査には、約300名の参加者がいます。<br>参加者全員から回答を回収した後、<strong>あなたの回答と別の参加者をランダムにマッチングし、みなさんが実際に回答した選択に基づいて、この課題の報酬額を決定します。</strong></p>
+            <div style="text-align: center; margin: 20px 0;">
+                <img src="${repo_site}image/post_match.png" style="max-width: 50%; height: auto;">
             </div>
-            <p style="font-size: 20px; line-height: 1.6; font-weight: bold; margin-bottom: 20px;">この課題では、これまでの課題とは別の参加者（見知らぬ人。ここでは仮に「Bさん」と呼びます）と新たにランダムにペアになり、ポイントの配分を決める意思決定ゲームを複数回行います。</p>
+        </div>
+    `,
+    `
+        <div class="instructions">
+            <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">報酬の決定について</h1>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">このゲーム課題では、2人1組で意思決定を計50回行います（説明は後述）。<br>そのうちの1回の回答が選ばれて、あなたの回答とマッチングした参加者の回答を組み合わせて、報酬額を決定します。</p>
             <p style="color: #dc3545; font-weight: bold; padding: 10px; border: 2px solid #dc3545; border-radius: 8px; background: #fff;">
-                【重要】実験で獲得した最終的なポイントに応じて、参加報酬とは別に追加のボーナス報酬が実際に支払われます。
+                【重要】このゲーム課題で決定する追加報酬は、この課題で獲得するポイント（1ポイント＝●円）の計算のもと算出されます。
             </p>
-            <p>なお、ペアとなる相手は完全に匿名であり、実験中に「相手が何を選んだか」「最終的なポイントはいくつか」といった結果は画面上には提示されません。</p>
-            <p>あなたの選択は、ランダムに選ばれた参加者の選択と照らし合わせられ、お互いの最終的なボーナス報酬額に反映されます。</p>
+            <p>後日、報酬をお支払いする方（0円より上の方）には、クラウドワークスを通じて個別タスクに参加すること（作業内容はありません）で、追加報酬を受け取ることができます。</p>
+        </div>
+    `,
+    `
+        <div class="instructions">
+            <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ご注意</h1>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">なお、ペアとなる相手は完全に匿名であり、実験中に「相手が何を選んだか」「最終的なポイントはいくつか」といった結果は画面上には提示されません。</p>
+            <p style="color: #dc3545; font-weight: bold; font-size: 22px; padding: 15px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 30px 0;">
+                あなたの選択が、あなた自身の報酬額にも、マッチングした参加者の報酬額にも影響します。<br>実際に他の人とリアルタイムにゲームしているつもりでお答えください。
+            </p>
         </div>
     `
+];
+
+intro_pages.forEach(page => {
+    timeline.push({
+        type: 'html-button-response',
+        button_html: custom_btn_html,
+        choices: ['次へ進む'],
+        stimulus: page
+    });
 });
 
-// 3. 教示 2: 利得表の事前説明（ハイライト連動の5ページ）
+// 3. 教示 2: 利得表の事前説明
 const sd_btn_style = '<style>#jspsych-html-button-response-btngroup { position: fixed !important; bottom: 8vh !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; z-index: 999 !important; }</style>';
 
 const instructions_pages = [
@@ -981,7 +1022,7 @@ const instructions_pages = [
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方 (1/5)</h2>
             <p style="margin-bottom:10px;">実験中は以下のような「ポイントの表」が提示されます。表には4パターンの結果が存在し、<b>あなたの選択によってBさんのポイントが変わり、Bさんの選択によってあなたのポイントが変わります</b>。</p>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, null, null)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin: 0; font-size:20px;">お互いの選択が交差したマスの中にある「あなた」の下の数字があなたのポイント、「Bさん」の下の数字がBさんのポイントになります。<br>次のページから、具体的な見方を説明します。</p>
@@ -993,13 +1034,13 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：Bさんが「パターン1」を選んだ場合 (2/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, null, 1)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, 1)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">Bさんが上の行である「パターン1」を選んだ場合（<span style="background-color:#ffe8d6; padding:0 5px;">オレンジ色</span>の行）、あなたが選ぶキーによってポイントが以下のように決まります。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 8pt、Bさんは 8pt を獲得。</li>
-                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 10pt、Bさんは 2pt を獲得。</li>
+                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 57pt、Bさんは 57pt を獲得。</li>
+                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 69pt、Bさんは 33pt を獲得。</li>
                 </ul>
             </div>
         </div>
@@ -1009,13 +1050,13 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：Bさんが「パターン2」を選んだ場合 (3/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, null, 2)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, 2)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">Bさんが下の行である「パターン2」を選んだ場合も同様です。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 2pt、Bさんは 10pt を獲得。</li>
-                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 4pt、Bさんは 4pt を獲得。</li>
+                    <li>あなたが <b>[ F ] キー</b> を選べば：あなたは 33pt、Bさんは 69pt を獲得。</li>
+                    <li>あなたが <b>[ J ] キー</b> を選べば：あなたは 45pt、Bさんは 45pt を獲得。</li>
                 </ul>
             </div>
         </div>
@@ -1025,13 +1066,13 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：あなたが [ F ] キー を選んだ場合 (4/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, 'f', null)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, 'f', null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">逆に、あなたが左の列である <b>[ F ] キー</b> を選んだ場合（<span style="background-color:#e7f1ff; padding:0 5px;">青色</span>の列）、Bさんの選択によってポイントが以下のように決まります。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>Bさんが「パターン1」を選んでいれば：あなたは 8pt、Bさんは 8pt を獲得。</li>
-                    <li>Bさんが「パターン2」を選んでいれば：あなたは 2pt、Bさんは 10pt を獲得。</li>
+                    <li>Bさんが「パターン1」を選んでいれば：あなたは 57pt、Bさんは 57pt を獲得。</li>
+                    <li>Bさんが「パターン2」を選んでいれば：あなたは 33pt、Bさんは 69pt を獲得。</li>
                 </ul>
             </div>
         </div>
@@ -1041,13 +1082,13 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：あなたが [ J ] キー を選んだ場合 (5/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, 'j', null)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, 'j', null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">あなたが右の列である <b>[ J ] キー</b> を選んだ場合も同様です。</p>
                 <ul style="margin-bottom: 0; font-size:20px; padding-left: 30px;">
-                    <li>Bさんが「パターン1」を選んでいれば：あなたは 10pt、Bさんは 2pt を獲得。</li>
-                    <li>Bさんが「パターン2」を選んでいれば：あなたは 4pt、Bさんは 4pt を獲得。</li>
+                    <li>Bさんが「パターン1」を選んでいれば：あなたは 69pt、Bさんは 33pt を獲得。</li>
+                    <li>Bさんが「パターン2」を選んでいれば：あなたは 45pt、Bさんは 45pt を獲得。</li>
                 </ul>
             </div>
         </div>
@@ -1087,9 +1128,9 @@ const quiz1 = {
             <h2>確認クイズ (1/2)</h2>
             <p>以下のポイントの表において、<b>あなたが「F」キーを選び、Bさんが「パターン2」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, null, null)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, null)}
     `,
-    choices: ['あなた： 2 pt, Bさん： 8 pt', 'あなた： 8 pt, Bさん： 2 pt'],
+    choices: ['あなた： 33 pt, Bさん： 69 pt', 'あなた： 69 pt, Bさん： 33 pt'],
     data: { is_quiz: true },
     on_finish: function () {
         quiz1_attempts++;
@@ -1105,7 +1146,7 @@ const quiz1_feedback = {
             return `
                 <div class="instructions">
                     <h2 style="color: #28a745;">正解です！</h2>
-                    <p>あなたが「F」、Bさんが「パターン2」を選んだ場合、結果は<b>「あなた： 2 pt, Bさん： 8 pt」</b>となります。</p>
+                    <p>あなたが「F」、Bさんが「パターン2」を選んだ場合、結果は<b>「あなた： 33 pt, Bさん： 69 pt」</b>となります。</p>
                 </div>
             `;
         } else {
@@ -1113,7 +1154,7 @@ const quiz1_feedback = {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「あなた： 2 pt, Bさん： 8 pt」</b>です。</p>
+                    <p>※正解は<b>「あなた： 33 pt, Bさん： 69 pt」</b>です。</p>
                     <p>これ以上の繰り返しはせず、次のクイズへ進みます。</p>
                 </div>
                 `;
@@ -1121,7 +1162,7 @@ const quiz1_feedback = {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「あなた： 2 pt, Bさん： 8 pt」</b>です。</p>
+                    <p>※正解は<b>「あなた： 33 pt, Bさん： 69 pt」</b>です。</p>
                     <p>もう一度選択してください。</p>
                 </div>
                 `;
@@ -1152,9 +1193,9 @@ const quiz2 = {
             <h2>確認クイズ (2/2)</h2>
             <p>以下のポイントの表において、<b>あなたが「J」キーを選び、Bさんが「パターン1」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
         </div>
-        ${generateMatrixHTML('PD', 1, 1, null, null)}
+        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, null)}
     `,
-    choices: ['あなた： 2 pt, Bさん： 8 pt', 'あなた： 8 pt, Bさん： 2 pt'],
+    choices: ['あなた： 33 pt, Bさん： 69 pt', 'あなた： 69 pt, Bさん： 33 pt'],
     data: { is_quiz: true },
     on_finish: function () {
         quiz2_attempts++;
@@ -1166,11 +1207,11 @@ const quiz2_feedback = {
     button_html: custom_btn_html,
     stimulus: function () {
         const last_resp = jsPsych.data.get().last(1).values()[0].response;
-        if (parseInt(last_resp, 10) === 1) { // 1 is correct (8pt, 2pt)
+        if (parseInt(last_resp, 10) === 1) { // 1 is correct
             return `
                 <div class="instructions">
                     <h2 style="color: #28a745;">正解です！</h2>
-                    <p>あなたが「J」、Bさんが「パターン1」を選んだ場合、結果は<b>「あなた： 8 pt, Bさん： 2 pt」</b>となります。</p>
+                    <p>あなたが「J」、Bさんが「パターン1」を選んだ場合、結果は<b>「あなた： 69 pt, Bさん： 33 pt」</b>となります。</p>
                 </div>
             `;
         } else {
@@ -1178,7 +1219,7 @@ const quiz2_feedback = {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「あなた： 8 pt, Bさん： 2 pt」</b>です。</p>
+                    <p>※正解は<b>「あなた： 69 pt, Bさん： 33 pt」</b>です。</p>
                     <p>これ以上の繰り返しはせず、次の課題へ進みます。</p>
                 </div>
                 `;
@@ -1186,7 +1227,7 @@ const quiz2_feedback = {
                 return `
                 <div class="instructions">
                     <h2 style="color: #dc3545;">不正解です</h2>
-                    <p>※正解は<b>「あなた： 8 pt, Bさん： 2 pt」</b>です。</p>
+                    <p>※正解は<b>「あなた： 69 pt, Bさん： 33 pt」</b>です。</p>
                     <p>もう一度選択してください。</p>
                 </div>
                 `;
@@ -1215,9 +1256,8 @@ timeline.push({
 });
 
 // ---------------------------------------------------------
-// トライアルコンポーネント (共通)
+// トライアルコンポーネント (共通・時間切れ処理追加)
 // ---------------------------------------------------------
-
 
 const matrix_trial = {
     type: 'html-keyboard-response',
@@ -1226,32 +1266,60 @@ const matrix_trial = {
             jsPsych.timelineVariable('game', true),
             jsPsych.timelineVariable('mult_self', true),
             jsPsych.timelineVariable('mult_other', true),
+            jsPsych.timelineVariable('swap_lr', true),
             null,
             null
         );
         return '<p style="margin-bottom: 20px; font-size: 28px; font-weight: bold; text-align: center;">どの選択肢を選びますか？<br><span style="font-size: 20px; font-weight: normal; color: #555;">（左なら F キー、右なら J キーを押してください）</span></p>' + matrixHTML;
     },
     choices: ['f', 'j'],
+    trial_duration: 15000, // 15秒でタイムアウト
     data: function () {
         return {
             task: 'response',
             game: jsPsych.timelineVariable('game'),
-            mult_self: jsPsych.timelineVariable('mult_self'),
-            mult_other: jsPsych.timelineVariable('mult_other'),
+            mult_self_c: jsPsych.timelineVariable('mult_self').c,
+            mult_self_m: jsPsych.timelineVariable('mult_self').m,
+            mult_other_c: jsPsych.timelineVariable('mult_other').c,
+            mult_other_m: jsPsych.timelineVariable('mult_other').m,
+            swap_lr: jsPsych.timelineVariable('swap_lr'),
             block_type: jsPsych.timelineVariable('block_type')
         }
+    }
+};
+
+const timeout_screen = {
+    type: 'html-keyboard-response',
+    stimulus: `
+        <div class="instructions">
+            <h2 style="color: #dc3545;">制限時間切れ</h2>
+            <p style="font-size: 20px; line-height: 1.6;">時間内に選択が確認できませんでした。</p>
+            <p style="font-size: 20px; line-height: 1.6;">15秒以内に選択してください。<br>自動的に次の試行へ進みます。</p>
+        </div>
+    `,
+    choices: jsPsych.NO_KEYS,
+    trial_duration: 2500,
+    data: { task: 'timeout' }
+};
+
+const if_timeout = {
+    timeline: [timeout_screen],
+    conditional_function: function() {
+        const last_trial = jsPsych.data.get().last(1).values()[0];
+        return last_trial.response === null;
     }
 };
 
 const highlight_trial = {
     type: 'html-keyboard-response',
     stimulus: function () {
-        const last_trial = jsPsych.data.get().last(1).values()[0];
+        const last_trial = jsPsych.data.get().last(2).filter({task: 'response'}).values()[0];
         const choice = last_trial.response;
         const matrixHTML = generateMatrixHTML(
             jsPsych.timelineVariable('game', true),
             jsPsych.timelineVariable('mult_self', true),
             jsPsych.timelineVariable('mult_other', true),
+            jsPsych.timelineVariable('swap_lr', true),
             choice,
             null
         );
@@ -1262,6 +1330,15 @@ const highlight_trial = {
     data: { task: 'highlight' }
 };
 
+const if_not_timeout = {
+    timeline: [highlight_trial, post_highlight_blank],
+    conditional_function: function() {
+        const last_trial = jsPsych.data.get().last(1).values()[0];
+        if(last_trial.task === 'timeout') return false; 
+        if(last_trial.task === 'response' && last_trial.response !== null) return true;
+        return false;
+    }
+};
 
 // ---------------------------------------------------------
 // 練習試行ブロック
@@ -1278,6 +1355,7 @@ timeline.push({
                 【重要】これ以降はマウスを使用しません。<br>すべてキーボード（Fキー、Jキー）のみで操作を行います。
             </p>
             <p>ポイントの表が表示されたら、あなたの選択だと思う列のキー（<b>[ F ] キー</b> または <b>[ J ] キー</b>）をキーボードで押してください。</p>
+            <p style="color: #dc3545; font-weight: bold; font-size: 24px; margin-top: 10px;">制限時間は各15秒間です。15秒以内に選択してください。</p>
             <p style="margin-top:40px; font-weight: bold;">準備ができたら、キーボードの「スペースキー」を押して開始してください。</p>
         </div>
     `,
@@ -1286,7 +1364,7 @@ timeline.push({
 
 const practice_vars = practice_trials.map(t => ({ ...t, block_type: 'practice' }));
 timeline.push({
-    timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
+    timeline: [sd_fixation, blank, matrix_trial, if_timeout, if_not_timeout],
     timeline_variables: practice_vars,
     randomize_order: false
 });
@@ -1302,19 +1380,16 @@ timeline.push({
             <p>これより本番を開始します。</p>
             <p>本番は複数回繰り返されます。なお、提示されるポイントの組み合わせは毎回異なります。</p>
             <p>各試行で、あなたの選択だと思う列のキー（<b>[ F ]</b> または <b>[ J ]</b>）を押してください。</p>
+            <p style="color: #dc3545; font-weight: bold; font-size: 24px; margin-top: 10px;">制限時間は各15秒間です。</p>
             <p style="margin-top:40px; font-weight: bold;">スペースキーを押して開始してください。</p>
         </div>
     `,
     choices: [' ']
 });
 
-const main_vars = main_trials.map(t => ({ ...t, block_type: 'main' }));
-
-// シャッフルして15, 15, 16の3ブロックに分割
-let all_sd_trials = jsPsych.randomization.shuffle(main_vars);
-let sd_block1 = all_sd_trials.slice(0, 15);
-let sd_block2 = all_sd_trials.slice(15, 30);
-let sd_block3 = all_sd_trials.slice(30);
+let sd_block1 = all_sd_trials.slice(0, 17);
+let sd_block2 = all_sd_trials.slice(17, 34);
+let sd_block3 = all_sd_trials.slice(34, 50);
 
 const sd_break = {
     type: 'html-keyboard-response',
@@ -1329,17 +1404,17 @@ const sd_break = {
 };
 
 timeline.push({
-    timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
+    timeline: [sd_fixation, blank, matrix_trial, if_timeout, if_not_timeout],
     timeline_variables: sd_block1
 });
 timeline.push(sd_break);
 timeline.push({
-    timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
+    timeline: [sd_fixation, blank, matrix_trial, if_timeout, if_not_timeout],
     timeline_variables: sd_block2
 });
 timeline.push(sd_break);
 timeline.push({
-    timeline: [sd_fixation, blank, matrix_trial, highlight_trial, post_highlight_blank],
+    timeline: [sd_fixation, blank, matrix_trial, if_timeout, if_not_timeout],
     timeline_variables: sd_block3
 });
 
