@@ -168,7 +168,15 @@ eem_timeline.push(preload_images);
 var enter_fullscreen = {
     type: 'fullscreen',
     fullscreen_mode: true,
-    message: '<style>#jspsych-fullscreen-btn { font-size: 20px; padding: 15px 50px; margin: 20px; cursor: pointer; transition: all 0.1s; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; color: #333; } #jspsych-fullscreen-btn:active { background-color: #d4edda; border-color: #28a745; transform: scale(0.95); }</style><div style="text-align: center; margin-top: 20%;"><p style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">この実験はフルスクリーンで実行されます。</p><p>準備ができたら下のボタンを押してフルスクリーンモードを開始してください。</p></div>',
+    message: '<style>#jspsych-fullscreen-btn { font-size: 20px; padding: 15px 50px; margin: 20px; cursor: pointer; transition: all 0.1s; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; color: #333; } #jspsych-fullscreen-btn:active { background-color: #d4edda; border-color: #28a745; transform: scale(0.95); }</style>' +
+             '<div style="text-align: center; margin-top: 10%;">' +
+             '<p style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">この実験はフルスクリーンで実行されます。</p>' +
+             '<div style="color: #dc3545; font-size: 18px; padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #fff3f3; max-width: 800px; margin: 30px auto; text-align: left; line-height: 1.6;">' +
+             '<b>【重要】</b><br>本調査では、各課題の途中でルールの理解度を確認するクイズが出題されます。<br>' +
+             'クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、<b>課題を最後まで完了しても報酬をお支払いできない場合</b>がございますのでご注意ください。' +
+             '</div>' +
+             '<p style="font-size: 20px; margin-top: 30px;">準備ができたら下のボタンを押してフルスクリーンモードを開始してください。</p>' +
+             '</div>',
     button_label: 'フルスクリーンを開始する'
 };
 eem_timeline.push(enter_fullscreen);
