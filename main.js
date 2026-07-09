@@ -1136,7 +1136,7 @@ timeline.push({
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">これより理解度クイズを行います</h1>
             <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">ここまでの説明の内容について、簡単なクイズを2問出題します。</p>
             <p style="color: #dc3545; font-weight: bold; font-size: 20px; padding: 15px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 30px 0;">
-                【重要】<br>クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、以降の課題にご参加いただけなくなる（報酬が支払われない）場合がございますのでご注意ください。
+                【重要】<br>クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、課題を最後まで完了しても報酬をお支払いできない場合がございますのでご注意ください。
             </p>
         </div>
     `
