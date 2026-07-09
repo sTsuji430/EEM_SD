@@ -1013,7 +1013,7 @@ intro_pages.forEach(page => {
 });
 
 // 3. 教示 2: 利得表の事前説明
-const sd_btn_style = '<style>#jspsych-html-button-response-btngroup { position: fixed !important; bottom: 8vh !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; z-index: 999 !important; }</style>';
+const sd_btn_style = '<style>#jspsych-html-button-response-btngroup { position: relative !important; margin-top: 30px !important; text-align: center !important; width: 100% !important; z-index: 999 !important; }</style>';
 
 const instructions_pages = [
     `

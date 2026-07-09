@@ -26,39 +26,30 @@ body.hide-cursor {
     font-size: 28px;
 }
 
-/* 教示やクイズのテキストを画面上部に固定配置する用 */
+/* 教示やクイズのテキストを自然なフローで配置する用 */
 .instructions-top {
-    position: fixed;
-    top: 5vh;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     width: 90%;
     max-width: 1000px;
     text-align: left;
     font-size: 22px;
+    margin: 0 auto 20px auto;
 }
 
-/* 教示の補足テキストなどを画面下部に固定配置する用 */
+/* 教示の補足テキストなどを自然なフローで配置する用 */
 .instructions-bottom {
-    position: fixed !important;
-    bottom: 16vh !important; /* ボタン（8vh）より少し上に配置 */
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    position: relative !important;
     width: 90% !important;
     max-width: 1000px !important;
     text-align: left !important;
     font-size: 22px !important;
+    margin: 20px auto 40px auto !important;
 }
 
-/* 常に絶対中央配置＆境界線の交点を完全な画面中央に揃える */
+/* 表を自然に中央揃えする */
 .centered-matrix-wrapper {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    /* 表の幅が960pxなので、-480pxで水平中心が境界線に一致 */
-    margin-left: -480px; 
-    /* ヘッダー70px + データ行125px = 195pxを上にオフセットすると、垂直中心が境界線に一致 */
-    margin-top: -195px;
+    position: relative;
+    margin: 0 auto;
     width: 960px;
     height: 320px;
 }
@@ -188,4 +179,33 @@ body.hide-cursor {
 /* jsPsych全体のベース文字サイズを大きくする */
 .jspsych-content {
     font-size: 20px !important;
+}
+
+/* Responsive layout for instructions to prevent overlapping */
+.responsive-instructions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    gap: 30px;
+    width: 100%;
+    padding: 20px 0;
+}
+.responsive-instructions .instructions-top,
+.responsive-instructions .instructions-bottom {
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 1000px !important;
+    margin: 0 !important;
+}
+.responsive-instructions .centered-matrix-wrapper {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 0 !important;
 }
