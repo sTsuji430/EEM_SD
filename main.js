@@ -2,7 +2,7 @@
 
 // --- Auto-scale 機能（画面が狭い・スケーリングが大きい場合のスクロール防止） ---
 function updateDisplayScale() {
-    const targetHeight = 850; // これより縦幅が狭ければ縮小
+    const targetHeight = 950; // これより縦幅が狭ければ縮小
     const targetWidth = 1100; // これより横幅が狭ければ縮小
     
     let scale = Math.min(
@@ -1000,7 +1000,7 @@ const intro_pages = [
             <p style="font-size: 20px; line-height: 1.6; font-weight: bold; margin-bottom: 20px;">今から行う課題では、この調査に参加している誰かと2人組になって課題を行います。ただし、リアルタイムに2人組で課題を行うわけではありません。</p>
             <p style="font-size: 18px; margin-bottom: 20px;">この調査には、約300名の参加者がいます。<br>参加者全員から回答を回収した後、<strong>あなたの回答と別の参加者をランダムにマッチングし、みなさんが実際に回答した選択に基づいて、この課題の報酬額を決定します。</strong></p>
             <div style="text-align: center; margin: 20px 0;">
-                <img src="${repo_site}image/post_match.png" style="max-width: 50%; height: auto;">
+                <img src="${repo_site}image/post_match.png" style="max-width: 60%; max-height: 35vh; width: auto; height: auto;">
             </div>
         </div>
     `,
@@ -1371,7 +1371,7 @@ timeline.push({
         <div class="instructions">
             <h2>練習試行</h2>
             <div style="text-align: center; margin: 20px 0;">
-                <img src="${repo_site}image/key_instruction.png" style="max-width: 60%; height: auto;">
+                <img src="${repo_site}image/key_instruction.png" style="max-width: 60%; max-height: 35vh; width: auto; height: auto;">
             </div>
             <p style="color: #007bff; font-weight: bold; font-size: 24px; padding: 15px; border: 3px solid #007bff; border-radius: 8px; background: #e7f1ff; margin: 30px 0;">
                 【重要】これ以降はマウスを使用しません。<br>すべてキーボード（Fキー、Jキー）のみで操作を行います。
