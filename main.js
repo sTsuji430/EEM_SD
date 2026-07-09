@@ -654,7 +654,7 @@ var svo_instructions = {
     stimulus: function () {
         // ★冒頭で定義した repo_site を使用
         var img_url = repo_site + "image/y_o.png";
-        var html = '<div style="text-align: left; line-height: 1.6; font-size: 24px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
+        var html = '<div style="text-align: left; line-height: 1.6; font-size: 20px; max-width: 800px; margin: 0 auto; padding-bottom: 20px;">';
         html += '<h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題2】が始まります</h1>';
 
         html += '<p style="margin-bottom: 10px; font-weight: bold; color: #d9534f;">（ここからはキーボードではなく、マウスを使って回答します）</p>';
@@ -1006,7 +1006,7 @@ const intro_pages = [
         <div class="instructions">
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題3】が始まります</h1>
             <p style="font-size: 20px; line-height: 1.6; font-weight: bold; margin-bottom: 20px;">今から行う課題では、この調査に参加している誰かと2人組になって課題を行います。ただし、リアルタイムに2人組で課題を行うわけではありません。</p>
-            <p style="font-size: 18px; margin-bottom: 20px;">この調査には、約300名の参加者がいます。<br>参加者全員から回答を回収した後、<strong>あなたの回答と別の参加者をランダムにマッチングし、みなさんが実際に回答した選択に基づいて、この課題の報酬額を決定します。</strong></p>
+            <p style="font-size: 20px; margin-bottom: 20px;">この調査には、約300名の参加者がいます。<br>参加者全員から回答を回収した後、<strong>あなたの回答と別の参加者をランダムにマッチングし、みなさんが実際に回答した選択に基づいて、この課題の報酬額を決定します。</strong></p>
             <div style="text-align: center; margin: 20px 0;">
                 <img src="${repo_site}image/post_match.png" style="max-width: 60%; max-height: 35vh; width: auto; height: auto;">
             </div>
@@ -1382,7 +1382,7 @@ timeline.push({
         <div class="instructions">
             <h2>練習試行</h2>
             <div style="text-align: center; margin: 20px 0;">
-                <img src="${repo_site}image/key_instruction.png" style="max-width: 60%; max-height: 35vh; width: auto; height: auto;">
+                <img src="${repo_site}image/key_instruction.png" style="max-width: 40%; max-height: 25vh; width: auto; height: auto;">
             </div>
             <p style="color: #007bff; font-weight: bold; font-size: 24px; padding: 15px; border: 3px solid #007bff; border-radius: 8px; background: #e7f1ff; margin: 30px 0;">
                 【重要】これ以降はマウスを使用しません。<br>すべてキーボード（Fキー、Jキー）のみで操作を行います。
