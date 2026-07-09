@@ -1,3 +1,25 @@
+
+
+// --- Auto-scale 機能（画面が狭い・スケーリングが大きい場合のスクロール防止） ---
+function updateDisplayScale() {
+    const targetHeight = 850; // これより縦幅が狭ければ縮小
+    const targetWidth = 1100; // これより横幅が狭ければ縮小
+    
+    let scale = Math.min(
+        1.0, 
+        window.innerHeight / targetHeight, 
+        window.innerWidth / targetWidth
+    );
+    
+    const content = document.querySelector('.jspsych-content');
+    if (content) {
+        content.style.transform = `scale(${scale})`;
+        content.style.transformOrigin = 'center center';
+    }
+}
+window.addEventListener('resize', updateDisplayScale);
+setInterval(updateDisplayScale, 250); // DOM再構築時にも確実に適用するため
+// -------------------------------------------------------------
 // =========================================================
 // Shared Components
 // =========================================================
