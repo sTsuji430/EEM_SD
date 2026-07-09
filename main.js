@@ -4,13 +4,13 @@
 function updateDisplayScale() {
     const targetHeight = 950; // これより縦幅が狭ければ縮小
     const targetWidth = 1100; // これより横幅が狭ければ縮小
-    
+
     let scale = Math.min(
-        1.0, 
-        window.innerHeight / targetHeight, 
+        1.0,
+        window.innerHeight / targetHeight,
         window.innerWidth / targetWidth
     );
-    
+
     const content = document.querySelector('.jspsych-content');
     if (content) {
         content.style.transform = `scale(${scale})`;
@@ -840,13 +840,13 @@ const base = [16, 12, 8, 4];
 
 // 2. 倍率ペアの定義 (定数c と 倍率m のオブジェクト)
 const dilemmaPairs = [
-    [{c:10, m:1}, {c:10, m:1}], [{c:10, m:2}, {c:10, m:2}], [{c:10, m:3}, {c:10, m:3}],
-    [{c:15, m:1}, {c:15, m:1}], [{c:15, m:2}, {c:15, m:2}], [{c:15, m:3}, {c:15, m:3}], // 対称6パターン
-    [{c:10, m:3}, {c:10, m:2}], [{c:10, m:2}, {c:10, m:3}] // 非対称2パターン
+    [{ c: 10, m: 1 }, { c: 10, m: 1 }], [{ c: 10, m: 2 }, { c: 10, m: 2 }], [{ c: 10, m: 3 }, { c: 10, m: 3 }],
+    [{ c: 15, m: 1 }, { c: 15, m: 1 }], [{ c: 15, m: 2 }, { c: 15, m: 2 }], [{ c: 15, m: 3 }, { c: 15, m: 3 }], // 対称6パターン
+    [{ c: 10, m: 3 }, { c: 10, m: 2 }], [{ c: 10, m: 2 }, { c: 10, m: 3 }] // 非対称2パターン
 ];
 
 const hgPairs = [
-    [{c:15, m:3}, {c:15, m:3}] // HG 1パターン (左右反転で2試行になる)
+    [{ c: 15, m: 3 }, { c: 15, m: 3 }] // HG 1パターン (左右反転で2試行になる)
 ];
 
 function createPayoffMatrix(gameType, pSelf, pOther) {
@@ -890,7 +890,7 @@ function generateMatrixHTML(game, m_self, m_other, swap_lr = false, hl_col = nul
     }
 
     let cell_CC = makeCell(p.p1.R, p.p2.R);
-    let cell_CD = makeCell(p.p1.T, p.p2.S); 
+    let cell_CD = makeCell(p.p1.T, p.p2.S);
     let cell_DC = makeCell(p.p1.S, p.p2.T);
     let cell_DD = makeCell(p.p1.P, p.p2.P);
 
@@ -981,16 +981,16 @@ let all_sd_trials = [anchor_trial_1, ...remaining_trials, anchor_trial_50];
 all_sd_trials = all_sd_trials.map(t => ({ ...t, block_type: 'main' }));
 
 const practice_trials = [
-    { game: 'PD', mult_self: {c:10, m:2}, mult_other: {c:10, m:2}, swap_lr: false },
-    { game: 'SH', mult_self: {c:15, m:1}, mult_other: {c:15, m:1}, swap_lr: true },
-    { game: 'CH', mult_self: {c:10, m:3}, mult_other: {c:10, m:2}, swap_lr: false }
+    { game: 'PD', mult_self: { c: 10, m: 2 }, mult_other: { c: 10, m: 2 }, swap_lr: false },
+    { game: 'SH', mult_self: { c: 15, m: 1 }, mult_other: { c: 15, m: 1 }, swap_lr: true },
+    { game: 'CH', mult_self: { c: 10, m: 3 }, mult_other: { c: 10, m: 2 }, swap_lr: false }
 ];
 
 // ---------------------------------------------------------
 // jsPsych タイムラインの構築
 // ---------------------------------------------------------
 var timeline = [].concat(eem_timeline, [svo_instructions, svo_procedure]); // EEMとSVOを先頭に結合
-window.experiment_timeline = timeline; 
+window.experiment_timeline = timeline;
 
 // 2. 教示 1: ルール説明（事後マッチングと報酬に関する3ページ）
 const intro_pages = [
@@ -1009,7 +1009,7 @@ const intro_pages = [
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">報酬の決定について</h1>
             <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">このゲーム課題では、2人1組で意思決定を計50回行います（説明は後述）。<br>そのうちの1回の回答が選ばれて、あなたの回答とマッチングした参加者の回答を組み合わせて、報酬額を決定します。</p>
             <p style="color: #dc3545; font-weight: bold; padding: 10px; border: 2px solid #dc3545; border-radius: 8px; background: #fff;">
-                【重要】このゲーム課題で決定する追加報酬は、この課題で獲得するポイント（1ポイント＝●円）の計算のもと算出されます。
+                【重要】このゲーム課題で決定する追加報酬は、この課題で獲得するポイント（1ポイント＝10円）の計算のもと算出されます。
             </p>
             <p>後日、報酬をお支払いする方（0円より上の方）には、クラウドワークスを通じて個別タスクに参加すること（作業内容はありません）で、追加報酬を受け取ることができます。</p>
         </div>
@@ -1044,7 +1044,7 @@ const instructions_pages = [
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方 (1/5)</h2>
             <p style="margin-bottom:10px;">実験中は以下のような「ポイントの表」が提示されます。表には4パターンの結果が存在し、<b>あなたの選択によってBさんのポイントが変わり、Bさんの選択によってあなたのポイントが変わります</b>。</p>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, null)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin: 0; font-size:20px;">お互いの選択が交差したマスの中にある「あなた」の下の数字があなたのポイント、「Bさん」の下の数字がBさんのポイントになります。<br>次のページから、具体的な見方を説明します。</p>
@@ -1056,7 +1056,7 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：Bさんが「パターン1」を選んだ場合 (2/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, 1)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, 1)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">Bさんが上の行である「パターン1」を選んだ場合（<span style="background-color:#ffe8d6; padding:0 5px;">オレンジ色</span>の行）、あなたが選ぶキーによってポイントが以下のように決まります。</p>
@@ -1072,7 +1072,7 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：Bさんが「パターン2」を選んだ場合 (3/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, 2)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, 2)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">Bさんが下の行である「パターン2」を選んだ場合も同様です。</p>
@@ -1088,7 +1088,7 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：あなたが [ F ] キー を選んだ場合 (4/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, 'f', null)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, 'f', null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">逆に、あなたが左の列である <b>[ F ] キー</b> を選んだ場合（<span style="background-color:#e7f1ff; padding:0 5px;">青色</span>の列）、Bさんの選択によってポイントが以下のように決まります。</p>
@@ -1104,7 +1104,7 @@ const instructions_pages = [
         <div class="instructions-top">
             <h2 style="border-bottom: 2px solid #ccc; padding-bottom: 5px; margin-bottom: 10px; font-size: 28px;">ポイントの表の見方：あなたが [ J ] キー を選んだ場合 (5/5)</h2>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, 'j', null)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, 'j', null)}
         <div class="instructions-bottom">
             <div style="background: #e9ecef; padding: 15px; border-radius: 8px;">
                 <p style="margin-top: 0; font-size:20px;">あなたが右の列である <b>[ J ] キー</b> を選んだ場合も同様です。</p>
@@ -1133,8 +1133,11 @@ timeline.push({
     choices: ['準備ができたらクイズを開始する'],
     stimulus: `
         <div class="instructions">
-            <h2>これより理解度クイズを行います</h2>
-            <p>ここまでの説明の内容について、簡単なクイズを2問出題します。</p>
+            <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">これより理解度クイズを行います</h1>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">ここまでの説明の内容について、簡単なクイズを2問出題します。</p>
+            <p style="color: #dc3545; font-weight: bold; font-size: 20px; padding: 15px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 30px 0;">
+                【重要】<br>クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、以降の課題にご参加いただけなくなる（報酬が支払われない）場合がございますのでご注意ください。
+            </p>
         </div>
     `
 });
@@ -1150,7 +1153,7 @@ const quiz1 = {
             <h2>確認クイズ (1/2)</h2>
             <p>以下のポイントの表において、<b>あなたが「F」キーを選び、Bさんが「パターン2」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, null)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, null)}
     `,
     choices: ['あなた： 33 pt, Bさん： 69 pt', 'あなた： 69 pt, Bさん： 33 pt'],
     data: { is_quiz: true },
@@ -1215,7 +1218,7 @@ const quiz2 = {
             <h2>確認クイズ (2/2)</h2>
             <p>以下のポイントの表において、<b>あなたが「J」キーを選び、Bさんが「パターン1」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
         </div>
-        ${generateMatrixHTML('PD', {c:7, m:3}, {c:7, m:3}, false, null, null)}
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, null)}
     `,
     choices: ['あなた： 33 pt, Bさん： 69 pt', 'あなた： 69 pt, Bさん： 33 pt'],
     data: { is_quiz: true },
@@ -1326,7 +1329,7 @@ const timeout_screen = {
 
 const if_timeout = {
     timeline: [timeout_screen],
-    conditional_function: function() {
+    conditional_function: function () {
         const last_trial = jsPsych.data.get().last(1).values()[0];
         return last_trial.response === null;
     }
@@ -1335,7 +1338,7 @@ const if_timeout = {
 const highlight_trial = {
     type: 'html-keyboard-response',
     stimulus: function () {
-        const last_trial = jsPsych.data.get().last(2).filter({task: 'response'}).values()[0];
+        const last_trial = jsPsych.data.get().last(2).filter({ task: 'response' }).values()[0];
         const choice = last_trial.response;
         const matrixHTML = generateMatrixHTML(
             jsPsych.timelineVariable('game', true),
@@ -1354,10 +1357,10 @@ const highlight_trial = {
 
 const if_not_timeout = {
     timeline: [highlight_trial, post_highlight_blank],
-    conditional_function: function() {
+    conditional_function: function () {
         const last_trial = jsPsych.data.get().last(1).values()[0];
-        if(last_trial.task === 'timeout') return false; 
-        if(last_trial.task === 'response' && last_trial.response !== null) return true;
+        if (last_trial.task === 'timeout') return false;
+        if (last_trial.task === 'response' && last_trial.response !== null) return true;
         return false;
     }
 };
@@ -1474,7 +1477,7 @@ jsPsych.init({
     on_finish: function () {
         // 元の仕様に戻す（stimulusを含めたフルデータを出力する）
         var datajs = jsPsych.data.get().json();
-        
+
         // もしIFrameの中（例：Qualtrics）で動いているなら、親画面にデータを送信する
         if (window.self !== window.top) {
             window.parent.postMessage({
