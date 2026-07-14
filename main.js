@@ -1,4 +1,4 @@
-
+﻿
 
 // --- Auto-scale 機能（画面が狭い・スケーリングが大きい場合のスクロール防止） ---
 function updateDisplayScale() {
@@ -155,7 +155,8 @@ var preload_images = {
     images: [
         repo_site + 'image/key_instruction.png',
         repo_site + 'image/y_o.png',
-        repo_site + 'image/y_o_v2.png'
+        repo_site + 'image/y_o_v2.png',
+        repo_site + 'image/post_match.png'
     ],
     message: '<p>データを読み込んでいます...</p>',
     show_progress_bar: true
@@ -171,7 +172,7 @@ var enter_fullscreen = {
     message: '<style>#jspsych-fullscreen-btn { font-size: 20px; padding: 15px 50px; margin: 20px; cursor: pointer; transition: all 0.1s; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; color: #333; } #jspsych-fullscreen-btn:active { background-color: #d4edda; border-color: #28a745; transform: scale(0.95); }</style>' +
              '<div style="text-align: center; margin-top: 10%;">' +
              '<p style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">この実験はフルスクリーンで実行されます。</p>' +
-             '<div style="color: #dc3545; font-size: 18px; padding: 20px; border: 2px solid #dc3545; border-radius: 8px; background: #fff3f3; max-width: 800px; margin: 30px auto; text-align: left; line-height: 1.6;">' +
+             '<div style="color: #dc3545; font-size: 24px; padding: 25px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; max-width: 800px; margin: 30px auto; text-align: left; line-height: 1.6;">' +
              '<b>【重要】</b><br>本調査では、各課題の途中でルールの理解度を確認するクイズが出題されます。<br>' +
              'クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、<b>課題を最後まで完了しても報酬をお支払いできない場合</b>がございますのでご注意ください。' +
              '</div>' +
@@ -848,8 +849,8 @@ const base = [16, 12, 8, 4];
 
 // 2. 倍率ペアの定義 (定数c と 倍率m のオブジェクト)
 const dilemmaPairs = [
-    [{ c: 10, m: 1 }, { c: 10, m: 1 }], [{ c: 10, m: 2 }, { c: 10, m: 2 }], [{ c: 10, m: 3 }, { c: 10, m: 3 }],
-    [{ c: 15, m: 1 }, { c: 15, m: 1 }], [{ c: 15, m: 2 }, { c: 15, m: 2 }], [{ c: 15, m: 3 }, { c: 15, m: 3 }], // 対称6パターン
+    [{ c: 10, m: 2 }, { c: 10, m: 2 }], [{ c: 10, m: 3 }, { c: 10, m: 3 }],
+    [{ c: 15, m: 2 }, { c: 15, m: 2 }], [{ c: 15, m: 3 }, { c: 15, m: 3 }], // 対称4パターン
     [{ c: 10, m: 3 }, { c: 10, m: 2 }], [{ c: 10, m: 2 }, { c: 10, m: 3 }] // 非対称2パターン
 ];
 
@@ -975,16 +976,16 @@ hgPairs.forEach(pair => {
     main_trials.push({ game: 'HG', mult_self: pair[0], mult_other: pair[1], swap_lr: true });
 });
 
-// 第1試行と第50試行のアンカーを抽出
-let anchor_trial_1 = main_trials.find(t => t.game === 'PD' && t.mult_self.c === 10 && t.mult_self.m === 1 && t.mult_other.c === 10 && t.mult_other.m === 1 && !t.swap_lr);
-let anchor_trial_50 = main_trials.find(t => t.game === 'PD' && t.mult_self.c === 10 && t.mult_self.m === 1 && t.mult_other.c === 10 && t.mult_other.m === 1 && t.swap_lr);
+// 第1試行と第38試行のアンカーを抽出
+let anchor_trial_1 = main_trials.find(t => t.game === 'PD' && t.mult_self.c === 10 && t.mult_self.m === 2 && t.mult_other.c === 10 && t.mult_other.m === 2 && !t.swap_lr);
+let anchor_trial_38 = main_trials.find(t => t.game === 'PD' && t.mult_self.c === 10 && t.mult_self.m === 2 && t.mult_other.c === 10 && t.mult_other.m === 2 && t.swap_lr);
 
-// アンカーを除外して残り48試行をシャッフル
-let remaining_trials = main_trials.filter(t => t !== anchor_trial_1 && t !== anchor_trial_50);
+// アンカーを除外して残り36試行をシャッフル
+let remaining_trials = main_trials.filter(t => t !== anchor_trial_1 && t !== anchor_trial_38);
 remaining_trials = seededShuffle(remaining_trials, 12345); // 固定シード
 
-// 全50試行を結合
-let all_sd_trials = [anchor_trial_1, ...remaining_trials, anchor_trial_50];
+// 全38試行を結合
+let all_sd_trials = [anchor_trial_1, ...remaining_trials, anchor_trial_38];
 // プロパティ追加
 all_sd_trials = all_sd_trials.map(t => ({ ...t, block_type: 'main' }));
 
@@ -1015,7 +1016,7 @@ const intro_pages = [
     `
         <div class="instructions">
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">報酬の決定について</h1>
-            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">このゲーム課題では、2人1組で意思決定を計50回行います（説明は後述）。<br>そのうちの1回の回答が選ばれて、あなたの回答とマッチングした参加者の回答を組み合わせて、報酬額を決定します。</p>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">このゲーム課題では、2人1組で意思決定を計38回行います（説明は後述）。<br>そのうちの1回の回答が選ばれて、あなたの回答とマッチングした参加者の回答を組み合わせて、報酬額を決定します。</p>
             <p style="color: #dc3545; font-weight: bold; padding: 10px; border: 2px solid #dc3545; border-radius: 8px; background: #fff;">
                 【重要】このゲーム課題で決定する追加報酬は、この課題で獲得するポイント（1ポイント＝10円）の計算のもと算出されます。
             </p>
@@ -1143,7 +1144,7 @@ timeline.push({
         <div class="instructions">
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">これより理解度クイズを行います</h1>
             <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">ここまでの説明の内容について、簡単なクイズを2問出題します。</p>
-            <p style="color: #dc3545; font-weight: bold; font-size: 20px; padding: 15px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 30px 0;">
+            <p style="color: #dc3545; font-weight: bold; font-size: 24px; padding: 25px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 30px 0;">
                 【重要】<br>クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、課題を最後まで完了しても報酬をお支払いできない場合がございますのでご注意ください。
             </p>
         </div>
@@ -1306,7 +1307,7 @@ const matrix_trial = {
         return '<p style="margin-bottom: 20px; font-size: 28px; font-weight: bold; text-align: center;">どの選択肢を選びますか？<br><span style="font-size: 20px; font-weight: normal; color: #555;">（左なら F キー、右なら J キーを押してください）</span></p>' + matrixHTML;
     },
     choices: ['f', 'j'],
-    trial_duration: 15000, // 15秒でタイムアウト
+    trial_duration: 30000, // 30秒でタイムアウト
     data: function () {
         return {
             task: 'response',
@@ -1327,7 +1328,7 @@ const timeout_screen = {
         <div class="instructions">
             <h2 style="color: #dc3545;">制限時間切れ</h2>
             <p style="font-size: 20px; line-height: 1.6;">時間内に選択が確認できませんでした。</p>
-            <p style="font-size: 20px; line-height: 1.6;">15秒以内に選択してください。<br>自動的に次の試行へ進みます。</p>
+            <p style="font-size: 20px; line-height: 1.6;">一定時間経過したため、<br>自動的に次の試行へ進みます。</p>
         </div>
     `,
     choices: jsPsych.NO_KEYS,
@@ -1388,7 +1389,7 @@ timeline.push({
                 【重要】これ以降はマウスを使用しません。<br>すべてキーボード（Fキー、Jキー）のみで操作を行います。
             </p>
             <p>ポイントの表が表示されたら、あなたの選択だと思う列のキー（<b>[ F ] キー</b> または <b>[ J ] キー</b>）をキーボードで押してください。</p>
-            <p style="color: #dc3545; font-weight: bold; font-size: 24px; margin-top: 10px;">制限時間は各15秒間です。15秒以内に選択してください。</p>
+
             <p style="margin-top:40px; font-weight: bold;">準備ができたら、キーボードの「スペースキー」を押して開始してください。</p>
         </div>
     `,
@@ -1413,16 +1414,16 @@ timeline.push({
             <p>これより本番を開始します。</p>
             <p>本番は複数回繰り返されます。なお、提示されるポイントの組み合わせは毎回異なります。</p>
             <p>各試行で、あなたの選択だと思う列のキー（<b>[ F ]</b> または <b>[ J ]</b>）を押してください。</p>
-            <p style="color: #dc3545; font-weight: bold; font-size: 24px; margin-top: 10px;">制限時間は各15秒間です。</p>
+
             <p style="margin-top:40px; font-weight: bold;">スペースキーを押して開始してください。</p>
         </div>
     `,
     choices: [' ']
 });
 
-let sd_block1 = all_sd_trials.slice(0, 17);
-let sd_block2 = all_sd_trials.slice(17, 34);
-let sd_block3 = all_sd_trials.slice(34, 50);
+let sd_block1 = all_sd_trials.slice(0, 13);
+let sd_block2 = all_sd_trials.slice(13, 26);
+let sd_block3 = all_sd_trials.slice(26, 38);
 
 const sd_break = {
     type: 'html-keyboard-response',
