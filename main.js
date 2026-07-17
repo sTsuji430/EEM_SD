@@ -170,14 +170,14 @@ var enter_fullscreen = {
     type: 'fullscreen',
     fullscreen_mode: true,
     message: '<style>#jspsych-fullscreen-btn { font-size: 20px; padding: 15px 50px; margin: 20px; cursor: pointer; transition: all 0.1s; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; color: #333; } #jspsych-fullscreen-btn:active { background-color: #d4edda; border-color: #28a745; transform: scale(0.95); }</style>' +
-             '<div style="text-align: center; margin-top: 10%;">' +
-             '<p style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">この実験はフルスクリーンで実行されます。</p>' +
-             '<div style="color: #dc3545; font-size: 24px; padding: 25px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; max-width: 800px; margin: 30px auto; text-align: left; line-height: 1.6;">' +
-             '<b>【重要】</b><br>本調査では、各課題の途中でルールの理解度を確認するクイズが出題されます。<br>' +
-             'クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、<b>課題を最後まで完了しても報酬をお支払いできない場合</b>がございますのでご注意ください。' +
-             '</div>' +
-             '<p style="font-size: 20px; margin-top: 30px;">準備ができたら下のボタンを押してフルスクリーンモードを開始してください。</p>' +
-             '</div>',
+        '<div style="text-align: center; margin-top: 10%;">' +
+        '<p style="font-size: 24px; font-weight: bold; margin-bottom: 20px;">この実験はフルスクリーンで実行されます。</p>' +
+        '<div style="color: #dc3545; font-size: 24px; padding: 25px; border: 3px solid #dc3545; border-radius: 8px; background: #fff3f3; max-width: 800px; margin: 30px auto; text-align: left; line-height: 1.6;">' +
+        '<b>【重要】</b><br>本調査では、各課題の途中でルールの理解度を確認するクイズが出題されます。<br>' +
+        'クイズに繰り返し不正解となった場合、ルールを十分に理解されていないとみなされ、<b>課題を最後まで完了しても報酬をお支払いできない場合</b>がございますのでご注意ください。' +
+        '</div>' +
+        '<p style="font-size: 20px; margin-top: 30px;">準備ができたら下のボタンを押してフルスクリーンモードを開始してください。</p>' +
+        '</div>',
     button_label: 'フルスクリーンを開始する'
 };
 eem_timeline.push(enter_fullscreen);
@@ -625,6 +625,13 @@ unequal_options.forEach(function (opt) {
 
 // ★ 最初の4ブロックの順序をランダム化して eem_timeline に追加
 eem_blocks = jsPsych.randomization.shuffle(eem_blocks);
+
+// ★ 最初のブロックの教示だけ「新しいブロック」という表現を避ける
+eem_blocks[0].timeline[0].stimulus = eem_blocks[0].timeline[0].stimulus.replace(
+    '新しいブロック（10問）が始まります',
+    '本番が始まります（最初の10問）'
+);
+
 eem_timeline = eem_timeline.concat(eem_blocks);
 
 // ★ パターン5（不平等同士）はランダム化に含めず、常に4ブロックの後（SVOの前）に固定で配置する
@@ -1412,8 +1419,9 @@ timeline.push({
         <div class="instructions">
             <h2>本番試行</h2>
             <p>これより本番を開始します。</p>
-            <p>本番は複数回繰り返されます。なお、提示されるポイントの組み合わせは毎回異なります。</p>
+            <p>本番は複数回繰り返されます。ただし、提示されるポイントの組み合わせは毎回異なります。</p>
             <p>各試行で、あなたの選択だと思う列のキー（<b>[ F ]</b> または <b>[ J ]</b>）を押してください。</p>
+            <p style="color: #0056b3; font-weight: bold; margin-top: 15px;">なお、本番の途中に休憩が2回あります。</p>
 
             <p style="margin-top:40px; font-weight: bold;">スペースキーを押して開始してください。</p>
         </div>
