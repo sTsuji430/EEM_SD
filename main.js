@@ -1,6 +1,8 @@
-﻿
+
 
 // --- Auto-scale 機能（画面が狭い・スケーリングが大きい場合のスクロール防止） ---
+let assigned_condition = 'Repeated'; // デフォルトは反復群
+
 function updateDisplayScale() {
     const targetHeight = 950; // これより縦幅が狭ければ縮小
     const targetWidth = 1100; // これより横幅が狭ければ縮小
@@ -1006,7 +1008,47 @@ const practice_trials = [
 // jsPsych タイムラインの構築
 // ---------------------------------------------------------
 var timeline = [].concat(eem_timeline, [svo_instructions, svo_procedure]); // EEMとSVOを先頭に結合
+//デバッグ用（SD課題のみ）
+//var timeline = [enter_fullscreen];
 window.experiment_timeline = timeline;
+
+// --- 3Round条件の分岐処理 ---
+var condition_assign = {
+    type: 'call-function',
+    func: function() {
+        if (Math.random() < 0.5) {
+            assigned_condition = 'Repeated';
+        } else {
+            assigned_condition = '3Round';
+        }
+    }
+};
+timeline.push(condition_assign);
+
+var exit_message = {
+    type: 'html-keyboard-response',
+    stimulus: '<div class="instructions"><p style="font-size: 24px; line-height: 1.6;">SVO課題が終了しました。<br>これより、形式の異なる3つ目の課題に移行します。<br><br>スペースキーを押すと画面が切り替わります。</p></div>',
+    choices: [' '],
+    on_finish: function() {
+        // スペースキーが押されたら実験を終了し、Qualtricsへデータ送信
+        jsPsych.endExperiment();
+    }
+};
+
+var exit_node = {
+    timeline: [
+        {
+            type: 'fullscreen',
+            fullscreen_mode: false // フルスクリーンを解除
+        },
+        exit_message
+    ],
+    conditional_function: function() {
+        return assigned_condition === '3Round';
+    }
+};
+timeline.push(exit_node);
+// ---------------------------------------------------------
 
 // 2. 教示 1: ルール説明（事後マッチングと報酬に関する3ページ）
 const intro_pages = [
@@ -1499,7 +1541,8 @@ jsPsych.init({
         if (window.self !== window.top) {
             window.parent.postMessage({
                 type: 'jspsych-data',
-                data: datajs
+                data: datajs,
+                condition: assigned_condition
             }, '*');
         } else {
             // ローカル（そのままHTMLを開いた場合）の処理
