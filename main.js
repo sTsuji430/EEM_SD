@@ -1016,7 +1016,8 @@ window.experiment_timeline = timeline;
 var condition_assign = {
     type: 'call-function',
     func: function() {
-        if (Math.random() < 0.5) {
+        // ★デバッグ用: 一時的に必ず 3Round（中断）になるように 0.0 に設定しています（本来は 0.5）
+        if (Math.random() < 0.0) {
             assigned_condition = 'Repeated';
         } else {
             assigned_condition = '3Round';
