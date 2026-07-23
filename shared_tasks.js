@@ -803,7 +803,9 @@ function finishExperiment(assigned_condition) {
                trial.task === 'pd_slider_trial' || 
                trial.task === 'response' || 
                trial.task === 'imc_quiz' || 
-               trial.task === 'layout_quiz';
+               trial.task === 'layout_quiz' ||
+               trial.task === 'sd_quiz1' ||
+               trial.task === 'sd_quiz2';
     }).ignore(['stimulus', 'internal_node_id']);
 
     var datacsv = filtered_data.csv();

@@ -256,6 +256,144 @@ timeline.push({
     `
 });
 
+// 4. クイズ 1 (最大2回までループ)
+let quiz1_attempts = 0;
+const quiz1 = {
+    type: 'html-button-response',
+    button_html: custom_btn_html,
+    stimulus: `
+        ${sd_btn_style}
+        <div class="instructions-top">
+            <h2>確認クイズ (1/2)</h2>
+            <p>以下のポイントの表において、<b>あなたが「F」キーを選び、Bさんが「パターン2」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
+        </div>
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, null)}
+    `,
+    choices: ['あなた： 33 pt, Bさん： 69 pt', 'あなた： 69 pt, Bさん： 33 pt'],
+    data: { is_quiz: true, task: 'sd_quiz1' },
+    on_finish: function () {
+        quiz1_attempts++;
+    }
+};
+
+const quiz1_feedback = {
+    type: 'html-button-response',
+    button_html: custom_btn_html,
+    stimulus: function () {
+        const last_resp = jsPsych.data.get().last(1).values()[0].response;
+        if (parseInt(last_resp, 10) === 0) { // 0 is correct
+            return `
+                <div class="instructions">
+                    <h2 style="color: #28a745;">正解です！</h2>
+                    <p>あなたが「F」、Bさんが「パターン2」を選んだ場合、結果は<b>「あなた： 33 pt, Bさん： 69 pt」</b>となります。</p>
+                </div>
+            `;
+        } else {
+            if (quiz1_attempts >= 2) {
+                return `
+                <div class="instructions">
+                    <h2 style="color: #dc3545;">不正解です</h2>
+                    <p>※正解は<b>「あなた： 33 pt, Bさん： 69 pt」</b>です。</p>
+                    <p>これ以上の繰り返しはせず、次のクイズへ進みます。</p>
+                </div>
+                `;
+            } else {
+                return `
+                <div class="instructions">
+                    <h2 style="color: #dc3545;">不正解です</h2>
+                    <p>※正解は<b>「あなた： 33 pt, Bさん： 69 pt」</b>です。</p>
+                    <p>もう一度選択してください。</p>
+                </div>
+                `;
+            }
+        }
+    },
+    choices: ['次へ進む'],
+};
+
+timeline.push({
+    timeline: [quiz1, quiz1_feedback],
+    loop_function: function (data) {
+        const resp = data.values()[0].response;
+        if (parseInt(resp, 10) === 0) return false;
+        if (quiz1_attempts >= 2) return false;
+        return true;
+    }
+});
+
+// 5. クイズ 2 (最大2回までループ)
+let quiz2_attempts = 0;
+const quiz2 = {
+    type: 'html-button-response',
+    button_html: custom_btn_html,
+    stimulus: `
+        ${sd_btn_style}
+        <div class="instructions-top">
+            <h2>確認クイズ (2/2)</h2>
+            <p>以下のポイントの表において、<b>あなたが「J」キーを選び、Bさんが「パターン1」を選んだ場合</b>、結果はどうなるでしょうか？<br>正しい組み合わせを下のボタンから選んでください。</p>
+        </div>
+        ${generateMatrixHTML('PD', { c: 7, m: 3 }, { c: 7, m: 3 }, false, null, null)}
+    `,
+    choices: ['あなた： 33 pt, Bさん： 69 pt', 'あなた： 69 pt, Bさん： 33 pt'],
+    data: { is_quiz: true, task: 'sd_quiz2' },
+    on_finish: function () {
+        quiz2_attempts++;
+    }
+};
+
+const quiz2_feedback = {
+    type: 'html-button-response',
+    button_html: custom_btn_html,
+    stimulus: function () {
+        const last_resp = jsPsych.data.get().last(1).values()[0].response;
+        if (parseInt(last_resp, 10) === 1) { // 1 is correct
+            return `
+                <div class="instructions">
+                    <h2 style="color: #28a745;">正解です！</h2>
+                    <p>あなたが「J」、Bさんが「パターン1」を選んだ場合、結果は<b>「あなた： 69 pt, Bさん： 33 pt」</b>となります。</p>
+                </div>
+            `;
+        } else {
+            if (quiz2_attempts >= 2) {
+                return `
+                <div class="instructions">
+                    <h2 style="color: #dc3545;">不正解です</h2>
+                    <p>※正解は<b>「あなた： 69 pt, Bさん： 33 pt」</b>です。</p>
+                    <p>これ以上の繰り返しはせず、次の課題へ進みます。</p>
+                </div>
+                `;
+            } else {
+                return `
+                <div class="instructions">
+                    <h2 style="color: #dc3545;">不正解です</h2>
+                    <p>※正解は<b>「あなた： 69 pt, Bさん： 33 pt」</b>です。</p>
+                    <p>もう一度選択してください。</p>
+                </div>
+                `;
+            }
+        }
+    },
+    choices: ['次へ進む'],
+};
+
+timeline.push({
+    timeline: [quiz2, quiz2_feedback],
+    loop_function: function (data) {
+        const resp = data.values()[0].response;
+        if (parseInt(resp, 10) === 1) return false;
+        if (quiz2_attempts >= 2) return false;
+        return true;
+    }
+});
+
+// 6. ここからマウスカーソルを非表示にする
+timeline.push({
+    type: 'call-function',
+    func: function () {
+        document.body.classList.add('hide-cursor');
+    }
+});
+
 // 38試行データ構築
 const games = ['PD', 'SH', 'CH'];
 let inner_sd_trials = [];
