@@ -14,8 +14,8 @@ const intro_pages_3 = [
                 この課題は全部で <strong>3回（3ラウンド）</strong> 行いますが、<br>
                 <strong>ラウンドごとにそれぞれ異なる3名の方（Bさん、Cさん、Dさん）と新たにペア</strong>になります。
             </p>
-            <div style="text-align: center; margin: 25px 0;">
-                <img src="${repo_site}image/postmatch_3round.png" style="max-width: 85%; max-height: 48vh; width: auto; height: auto; border: 1px solid #ddd; border-radius: 10px; padding: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <div style="text-align: center; margin: 15px 0;">
+                <img src="${repo_site}image/postmatch_3round.png" style="max-width: 65%; max-height: 28vh; width: auto; height: auto; border: 1px solid #ddd; border-radius: 10px; padding: 5px; box-shadow: 0 3px 8px rgba(0,0,0,0.05);">
             </div>
             <p style="font-size: 18px; color: #555; text-align: center;">※お互いに完全に匿名であり、リアルタイムに2人組で課題を行うわけではありません。</p>
         </div>
@@ -68,8 +68,8 @@ const intro_pages_3 = [
             <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">
                 全3ラウンドの回答をすべて回収した後、<strong>いずれか1つのラウンドの回答がランダムに選ばれます。</strong>
             </p>
-            <div style="text-align: center; margin: 25px 0;">
-                <img src="${repo_site}image/postmatch_3round.png" style="max-width: 85%; max-height: 40vh; width: auto; height: auto; border: 1px solid #ddd; border-radius: 10px; padding: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <div style="text-align: center; margin: 15px 0;">
+                <img src="${repo_site}image/postmatch_3round.png" style="max-width: 65%; max-height: 26vh; width: auto; height: auto; border: 1px solid #ddd; border-radius: 10px; padding: 5px; box-shadow: 0 3px 8px rgba(0,0,0,0.05);">
             </div>
             <p style="font-size: 19px; line-height: 1.6; margin-bottom: 20px;">
                 選ばれたラウンドにおいて実際にペアになった相手の回答と突き合わせ、<strong>算出されたあなたの最終獲得金額が、そのままあなたの追加報酬（円）</strong>となります。
