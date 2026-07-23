@@ -417,7 +417,7 @@ const fixedSeedShuffleOrder = [
     12, 4, 23, 8, 31, 15, 2, 27, 19, 10,
     33, 6, 21, 14, 29, 1, 18, 25, 9, 34,
     3, 16, 28, 11, 22, 5, 30, 17, 0, 32,
-    7, 24, 13, 26
+    7, 24, 13, 26, 35, 36
 ];
 
 const remaining_sd_trials = inner_sd_trials.concat(hg_trials);
