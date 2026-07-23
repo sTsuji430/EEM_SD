@@ -13,14 +13,46 @@
     <script src="jspsych-6.3.1/plugins/jspsych-html-button-response.js"></script>
     <script src="jspsych-6.3.1/plugins/jspsych-fullscreen.js"></script>
     <script src="jspsych-6.3.1/plugins/jspsych-call-function.js"></script>
-    <script src="jspsych-6.3.1/plugins/jspsych-preload.js"></script>
+    <script src="jspsych-6.3.1/plugins/jspsych-survey-html-form.js"></script>
     
     <!-- スタイルの読み込み -->
     <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <!-- 実験ロジックの読み込み -->
-    <!-- ※キャッシュ対策でパラメーター（?v=5）をつけて最新を強制取得 -->
-    <script src="main.js?v=5"></script>
+    <!-- 実験ロジックの動的読み込み -->
+    <script>
+        // URLパラメータ 'cond' の取得 (?cond=3 または ?cond=38)
+        const urlParams = new URLSearchParams(window.location.search);
+        const cond = urlParams.get('cond');
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src + '?v=' + new Date().getTime(); // キャッシュ対策
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        async function initApp() {
+            try {
+                // 1. 共通タスク（EEM・SVO課題）の読み込み
+                await loadScript('shared_tasks.js');
+
+                // 2. condに応じたPD課題の読み込み
+                if (cond === '3') {
+                    await loadScript('main_3.js');
+                } else {
+                    // デフォルトまたは cond=38
+                    await loadScript('main_38.js');
+                }
+            } catch (e) {
+                console.error('実験スクリプトの読み込み中にエラーが発生しました:', e);
+            }
+        }
+
+        initApp();
+    </script>
 </body>
 </html>

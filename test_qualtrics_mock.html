@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Qualtrics Mock Test (Local Debug)</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #e9ecef; }
+        .box { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button { font-size: 18px; padding: 10px 20px; margin: 10px 5px; cursor: pointer; }
+        #log { background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 6px; font-family: monospace; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Qualtrics 動作模擬テスト画面</h2>
+        <p>以下のボタンを押して、ローカルでQualtricsと同様のIFrame通信・データ受信をテストできます。</p>
+        <button onclick="startExperiment('3')">cond=3 (3回スライダーPD) をテスト</button>
+        <button onclick="startExperiment('38')">cond=38 (38回離散PD) をテスト</button>
+
+        <h3>受信ログ:</h3>
+        <div id="log">実験を開始すると、終了時に受信したデータがここに表示されます...</div>
+    </div>
+
+    <script>
+        function startExperiment(condValue) {
+            const nocache = "?cond=" + condValue + "&nocache=" + new Date().getTime();
+            const task_url = "experiment.html" + nocache;
+
+            const iframe = document.createElement('iframe');
+            iframe.src = task_url;
+            iframe.allowFullscreen = true; 
+            
+            iframe.style.position = "fixed";
+            iframe.style.top = "0";
+            iframe.style.left = "0";
+            iframe.style.width = "100vw";
+            iframe.style.height = "100vh";
+            iframe.style.border = "none";
+            iframe.style.zIndex = "99999";
+            iframe.style.backgroundColor = "#f7f9fa"; 
+            
+            document.body.appendChild(iframe);
+
+            const messageListener = function(event) {
+                if (event.data && event.data.type === 'jspsych-data') {
+                    document.getElementById('log').innerText = 
+                        "✅ データ受信成功！\n" +
+                        "Condition: " + event.data.condition + "\n\n" +
+                        "--- 出力データ (CSV) ---\n" + 
+                        event.data.data;
+                    
+                    if (document.body.contains(iframe)) {
+                        document.body.removeChild(iframe);
+                    }
+                    window.removeEventListener("message", messageListener);
+                }
+            };
+
+            window.addEventListener("message", messageListener);
+        }
+    </script>
+</body>
+</html>

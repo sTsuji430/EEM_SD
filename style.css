@@ -175,6 +175,27 @@ body.hide-cursor {
     box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
 }
 
+/* 3回スライダー送信ボタンを大きく目立たせる */
+#jspsych-survey-html-form-next {
+    font-size: 26px !important;
+    font-weight: bold !important;
+    padding: 18px 60px !important;
+    background-color: #0056b3 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    transition: transform 0.1s ease, background-color 0.2s ease !important;
+    margin: 30px auto 10px auto !important;
+}
+
+#jspsych-survey-html-form-next:hover {
+    background-color: #004085 !important;
+    transform: scale(1.02);
+}
+
+
 
 /* jsPsych全体のベース文字サイズを大きくする */
 .jspsych-content {
@@ -209,3 +230,41 @@ body.hide-cursor {
     left: auto !important;
     margin: 0 !important;
 }
+
+/* 3回連続値スライダーPD課題用スタイル */
+.pd3-container input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: #e9ecef;
+    border-radius: 5px;
+    outline: none;
+}
+
+.pd3-container input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #0056b3;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease;
+}
+
+.pd3-container input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+
+.pd3-container input[name=choice]::-webkit-slider-thumb {
+    background: #28a745;
+}
+
+.card-question {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-question:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08) !important;
+}
+
