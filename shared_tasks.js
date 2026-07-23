@@ -795,7 +795,18 @@ timeline.push(svo_procedure);
 // 実験終了・Qualtrics送信処理の共通関数
 // =========================================================
 function finishExperiment(assigned_condition) {
-    var datacsv = jsPsych.data.get().csv();
+    // Qualtrics 20KB (20,000文字) 制限を確実にクリアするため、
+    // 研究に必要な本番試行データ（EEM, SVO, PD課題, クイズ）のみを抽出し、HTML stimulus等の不要な列を除外して最適化
+    var filtered_data = jsPsych.data.get().filterCustom(function(trial) {
+        return trial.task === 'eem' || 
+               trial.task === 'svo' || 
+               trial.task === 'pd_slider_trial' || 
+               trial.task === 'response' || 
+               trial.task === 'imc_quiz' || 
+               trial.task === 'layout_quiz';
+    }).ignore(['stimulus', 'internal_node_id']);
+
+    var datacsv = filtered_data.csv();
 
     if (window.self !== window.top) {
         window.parent.postMessage({
@@ -806,12 +817,12 @@ function finishExperiment(assigned_condition) {
     } else {
         document.body.innerHTML = `
             <div style="text-align:center; margin-top:50px; font-family: sans-serif; font-size: 24px;">
-                <h2>データを保存しました</h2>
-                <p>（ローカル動作確認用表示）</p>
+                <h2>データを保存しました（最適化済み）</h2>
+                <p>送信データ量: ${datacsv.length} 文字 / 20,000文字制限</p>
                 <p>F12キーのコンソール等で出力CSVを確認できます。</p>
             </div>
         `;
-        console.log("=== 実験結果 CSV ===");
+        console.log("=== 実験結果 CSV (" + datacsv.length + " 文字) ===");
         console.log(datacsv);
     }
 }
