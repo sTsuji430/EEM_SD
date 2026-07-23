@@ -422,7 +422,7 @@ const sd_break = {
         </div>
     `,
     choices: [' ']
-});
+};
 
 timeline.push({
     timeline: [sd_fixation, blank, matrix_trial, if_timeout, if_not_timeout],
