@@ -1,7 +1,7 @@
 // =========================================================
 // main_3.js
 // 3回連続値スライダーPD課題タイムライン & init
-// (cond='3' の場合のタイムライン: 元手200円, 10円刻み, ハイブリッド入力, 2段階確定ポップアウト)
+// (cond='3' の場合のタイムライン: 元手200円, 10円刻み, 初期値なしアンカリング防止ハイブリッド, 2段階確定ポップアウト)
 // =========================================================
 
 // --- 1. 3回PD課題の教示画面 (スモールステップ化) ---
@@ -92,7 +92,7 @@ const intro_pages_3 = [
     `,
     `
         <div class="instructions">
-            <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">回答方法について（ハイブリッド操作）</h1>
+            <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">回答方法について</h1>
             <p style="font-size: 19px; line-height: 1.8;">
                 各ラウンドでは、以下の2項目に回答していただきます：
             </p>
@@ -101,8 +101,9 @@ const intro_pages_3 = [
                 <strong>② 【選択】あなたは200円のうち、相手に【何円】渡しますか？</strong>
             </div>
             <div style="background: #e7f1ff; border: 2px solid #0056b3; padding: 15px 20px; border-radius: 8px; margin: 20px 0; font-size: 18px; line-height: 1.6;">
-                💡 <strong>【自由な回答方法】</strong><br>
-                ・<strong>スライダーを動かす</strong>か、または<strong>右側の入力欄に数字を直接入力する</strong>か、お好きな方法で入力できます（両方は自動で動的連動します）。
+                💡 <strong>【回答の進め方】</strong><br>
+                最初は金額が<strong>「未選択」</strong>になっています。<br>
+                スライダーを動かすか、右側の入力欄に数字を直接入力して回答してください（未選択のままでは進めません）。
             </div>
             <p style="color: #dc3545; font-weight: bold; font-size: 19px; padding: 12px; border: 2px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 20px 0;">
                 なお、ペアとなる相手は完全に匿名であり、実験中に「相手が何を選んだか」といった結果は画面上には提示されません。<br>
@@ -131,7 +132,7 @@ const shuffled_multipliers = jsPsych.randomization.shuffle(raw_multipliers);
 // 相手のネーミング (Bさん、Cさん、Dさん)
 const partner_names = ["Bさん", "Cさん", "Dさん"];
 
-// --- 3. 各試行（1画面2スライダー＆数値直接入力ハイブリッド）の構築 ---
+// --- 3. 各試行（初期値なし・アンカリング防止ハイブリッド）の構築 ---
 shuffled_multipliers.forEach(function (mult, index) {
     const round_num = index + 1;
     const partner_name = partner_names[index];
@@ -144,12 +145,10 @@ shuffled_multipliers.forEach(function (mult, index) {
         type: 'survey-html-form',
         button_label: '回答を送信（非表示）',
         html: function () {
-            const init_val = 0; // 初期値＝0円
-
             return `
                 <div class="pd3-container" style="max-width: 850px; margin: 0 auto; text-align: left; font-family: sans-serif;">
                     
-                    <!-- 大きくメリハリのある最上部倍率ヒーローカード -->
+                    <!-- 最上部倍率ヒーローカード -->
                     <div style="background: linear-gradient(135deg, #ffffff 0%, #f1f3f5 100%); border: 3px solid ${badge_color}; border-radius: 14px; padding: 20px 30px; margin-bottom: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); text-align: center;">
                         <div style="font-size: 20px; font-weight: bold; color: #666; letter-spacing: 1px; margin-bottom: 5px;">
                             ROUND ${round_num} / 3 （ペア：${partner_name}）
@@ -162,15 +161,20 @@ shuffled_multipliers.forEach(function (mult, index) {
                         </div>
                     </div>
 
-                    <!-- 質問1: 予測 (0〜200円、スライダー ＆ 数値入力ハイブリッド) -->
-                    <div class="card-question" style="background: #fff; border: 2px solid #0056b3; border-radius: 12px; padding: 22px 28px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <!-- エラー未入力警告メッセージ表示領域 -->
+                    <div id="error-msg-box" style="display: none; background: #fff3f3; border: 2px solid #d9534f; color: #d9534f; border-radius: 10px; padding: 12px 20px; font-size: 18px; font-weight: bold; margin-bottom: 20px; text-align: center;">
+                        ⚠️ まだ選択されていない項目があります。スライダーを操作するか数字を入力してください。
+                    </div>
+
+                    <!-- 質問1: 予測 (初期値なし) -->
+                    <div id="card_pred" class="card-question" style="background: #fff; border: 2px solid #0056b3; border-radius: 12px; padding: 22px 28px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: border-color 0.3s, box-shadow 0.3s;">
                         <div style="font-size: 20px; font-weight: bold; color: #0056b3; margin-bottom: 14px;">
                             ①【予測】相手（${partner_name}）は200円のうち、あなたに【何円】渡してくると思いますか？
                         </div>
                         <div style="display: flex; align-items: center; gap: 20px; margin-top: 15px;">
                             <span style="font-size: 16px; font-weight: bold; min-width: 40px;">0円</span>
-                            <input type="range" id="pred_range" min="0" max="200" value="${init_val}" step="10" 
-                                style="flex-grow: 1; height: 12px; cursor: pointer;">
+                            <input type="range" id="pred_range" min="0" max="200" value="100" step="10" 
+                                style="flex-grow: 1; height: 12px; cursor: pointer; opacity: 0.5;">
                             <span style="font-size: 16px; font-weight: bold; min-width: 50px;">200円</span>
                         </div>
                         <!-- 目盛り表示 -->
@@ -180,21 +184,22 @@ shuffled_multipliers.forEach(function (mult, index) {
                         <!-- 数値直接入力ボックス＆連動エリア -->
                         <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 12px;">
                             <span style="font-size: 17px; color: #555; font-weight: bold;">あなたの予測: </span>
-                            <input type="number" name="prediction" id="pred_num" min="0" max="200" step="10" value="${init_val}" 
-                                style="font-size: 24px; font-weight: bold; color: #0056b3; width: 100px; padding: 4px 10px; border: 2px solid #0056b3; border-radius: 8px; text-align: right; background: #f4f8ff;">
-                            <span style="font-size: 22px; font-weight: bold; color: #0056b3;">円</span>
+                            <input type="number" name="prediction" id="pred_num" min="0" max="200" step="10" value="" placeholder="未選択"
+                                style="font-size: 22px; font-weight: bold; color: #0056b3; width: 110px; padding: 4px 10px; border: 2px solid #0056b3; border-radius: 8px; text-align: right; background: #f4f8ff;">
+                            <span id="pred_unit" style="font-size: 22px; font-weight: bold; color: #0056b3; display: none;">円</span>
+                            <span id="pred_status_label" style="font-size: 18px; font-weight: bold; color: #999; margin-left: 5px;">（未選択）</span>
                         </div>
                     </div>
 
-                    <!-- 質問2: 選択 (0〜200円、スライダー ＆ 数値入力ハイブリッド) -->
-                    <div class="card-question" style="background: #fff; border: 2px solid #28a745; border-radius: 12px; padding: 22px 28px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                    <!-- 質問2: 選択 (初期値なし) -->
+                    <div id="card_choice" class="card-question" style="background: #fff; border: 2px solid #28a745; border-radius: 12px; padding: 22px 28px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: border-color 0.3s, box-shadow 0.3s;">
                         <div style="font-size: 20px; font-weight: bold; color: #28a745; margin-bottom: 14px;">
                             ②【選択】あなたは200円のうち、相手（${partner_name}）に【何円】渡しますか？
                         </div>
                         <div style="display: flex; align-items: center; gap: 20px; margin-top: 15px;">
                             <span style="font-size: 16px; font-weight: bold; min-width: 40px;">0円</span>
-                            <input type="range" id="choice_range" min="0" max="200" value="${init_val}" step="10" 
-                                style="flex-grow: 1; height: 12px; cursor: pointer;">
+                            <input type="range" id="choice_range" min="0" max="200" value="100" step="10" 
+                                style="flex-grow: 1; height: 12px; cursor: pointer; opacity: 0.5;">
                             <span style="font-size: 16px; font-weight: bold; min-width: 50px;">200円</span>
                         </div>
                         <!-- 目盛り表示 -->
@@ -204,9 +209,10 @@ shuffled_multipliers.forEach(function (mult, index) {
                         <!-- 数値直接入力ボックス＆連動エリア -->
                         <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 12px;">
                             <span style="font-size: 17px; color: #555; font-weight: bold;">あなたの選択: </span>
-                            <input type="number" name="choice" id="choice_num" min="0" max="200" step="10" value="${init_val}" 
-                                style="font-size: 24px; font-weight: bold; color: #28a745; width: 100px; padding: 4px 10px; border: 2px solid #28a745; border-radius: 8px; text-align: right; background: #f4fff6;">
-                            <span style="font-size: 22px; font-weight: bold; color: #28a745;">円</span>
+                            <input type="number" name="choice" id="choice_num" min="0" max="200" step="10" value="" placeholder="未選択"
+                                style="font-size: 22px; font-weight: bold; color: #28a745; width: 110px; padding: 4px 10px; border: 2px solid #28a745; border-radius: 8px; text-align: right; background: #f4fff6;">
+                            <span id="choice_unit" style="font-size: 22px; font-weight: bold; color: #28a745; display: none;">円</span>
+                            <span id="choice_status_label" style="font-size: 18px; font-weight: bold; color: #999; margin-left: 5px;">（未選択）</span>
                         </div>
                     </div>
 
@@ -217,7 +223,7 @@ shuffled_multipliers.forEach(function (mult, index) {
                         </button>
                     </div>
 
-                    <!-- 2段階目のポップアウト確認モーダル (transform:scaleの影響を防ぐためdocument.bodyに移動される) -->
+                    <!-- 2段階目のポップアウト確認モーダル -->
                     <div id="modal-container" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); z-index: 999999; justify-content: center; align-items: center;">
                         <div style="background: #fff; padding: 30px; border-radius: 14px; max-width: 500px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: modalFadeIn 0.25s ease-out; box-sizing: border-box; display: inline-block; vertical-align: middle;">
                             <div style="font-size: 24px; font-weight: bold; color: #333; margin-bottom: 20px; border-bottom: 3px solid #0056b3; padding-bottom: 12px;">
@@ -261,38 +267,64 @@ shuffled_multipliers.forEach(function (mult, index) {
             var cancelBtn = document.getElementById('modal-cancel-btn');
             var modalConfirmBtn = document.getElementById('modal-confirm-btn');
             var modalContainer = document.getElementById('modal-container');
+            var errorMsgBox = document.getElementById('error-msg-box');
 
-            // --- ハイブリッド連動制御 (スライダー ⇄ 数値ボックス) ---
-            function setupHybridSync(type) {
+            var isPredSelected = false;
+            var isChoiceSelected = false;
+
+            // --- アンカリング防止連動制御 ---
+            function setupNoDefaultSync(type) {
                 var range = document.getElementById(type + '_range');
                 var num = document.getElementById(type + '_num');
+                var unit = document.getElementById(type + '_unit');
+                var statusLabel = document.getElementById(type + '_status_label');
+                var card = document.getElementById('card_' + type);
+
                 if (!range || !num) return;
 
-                // 1. スライダー動かし時 ➔ 入力ボックスへ反映
+                function activateInput(val) {
+                    if (type === 'pred') isPredSelected = true;
+                    if (type === 'choice') isChoiceSelected = true;
+
+                    range.style.opacity = '1';
+                    num.value = val;
+                    if (unit) unit.style.display = 'inline';
+                    if (statusLabel) statusLabel.style.display = 'none';
+                    if (card) {
+                        card.style.borderColor = (type === 'pred') ? '#0056b3' : '#28a745';
+                        card.style.boxShadow = '0 4px 10px rgba(0,0,0,0.05)';
+                    }
+                    if (errorMsgBox) errorMsgBox.style.display = 'none';
+                }
+
+                // スライダー操作（クリック／ドラッグ）時
                 range.addEventListener('input', function() {
-                    num.value = range.value;
+                    activateInput(range.value);
+                });
+                range.addEventListener('change', function() {
+                    activateInput(range.value);
                 });
 
-                // 2. 入力ボックス変更時 ➔ スライダーへ反映＆バリデーション
+                // 数値入力ボックス変更時
                 function updateFromNum() {
                     var val = parseInt(num.value, 10);
-                    if (isNaN(val)) val = 0;
+                    if (isNaN(val)) return;
                     if (val < 0) val = 0;
                     if (val > 200) val = 200;
-                    // 10円刻みに整形
                     val = Math.round(val / 10) * 10;
                     num.value = val;
                     range.value = val;
+                    activateInput(val);
                 }
 
                 num.addEventListener('input', updateFromNum);
                 num.addEventListener('change', updateFromNum);
             }
 
-            setupHybridSync('pred');
-            setupHybridSync('choice');
+            setupNoDefaultSync('pred');
+            setupNoDefaultSync('choice');
 
-            // scale(transform)による全画面オーバーレイの枠崩れ・位置ずれを防ぐため document.body 直下に移動
+            // document.body 直下へ移動
             if (modalContainer && modalContainer.parentNode !== document.body) {
                 document.body.appendChild(modalContainer);
             }
@@ -300,6 +332,22 @@ shuffled_multipliers.forEach(function (mult, index) {
             if (confirmBtn) {
                 confirmBtn.addEventListener('click', function(e) {
                     e.preventDefault();
+
+                    // 未入力バリデーションチェック
+                    if (!isPredSelected || !isChoiceSelected) {
+                        if (errorMsgBox) errorMsgBox.style.display = 'block';
+                        if (!isPredSelected) {
+                            var cardP = document.getElementById('card_pred');
+                            if (cardP) cardP.style.borderColor = '#d9534f';
+                        }
+                        if (!isChoiceSelected) {
+                            var cardC = document.getElementById('card_choice');
+                            if (cardC) cardC.style.borderColor = '#d9534f';
+                        }
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
+                    }
+
                     var p = document.getElementById('pred_num').value;
                     var c = document.getElementById('choice_num').value;
                     var predElem = document.getElementById('modal-pred-val');
@@ -338,7 +386,6 @@ shuffled_multipliers.forEach(function (mult, index) {
             }
         },
         on_finish: function (data) {
-            // 残留モーダル要素のクリーンアップ
             var modalContainer = document.getElementById('modal-container');
             if (modalContainer && modalContainer.parentNode) {
                 modalContainer.parentNode.removeChild(modalContainer);
