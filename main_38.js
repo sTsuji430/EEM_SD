@@ -457,7 +457,13 @@ const matrix_trial = {
 
 const timeout_trial = {
     type: 'html-keyboard-response',
-    stimulus: '<div style="font-size: 32px; color: #d9534f; font-weight: bold; margin-top: 150px;">制限時間切れです</div>',
+    stimulus: `
+        <div class="instructions">
+            <h2 style="color: #dc3545;">制限時間切れ</h2>
+            <p style="font-size: 20px; line-height: 1.6;">時間内に選択が確認できませんでした。</p>
+            <p style="font-size: 20px; line-height: 1.6;">一定時間経過したため、<br>自動的に次の試行へ進みます。</p>
+        </div>
+    `,
     choices: jsPsych.NO_KEYS,
     trial_duration: 2500,
     data: { task: 'timeout' }
