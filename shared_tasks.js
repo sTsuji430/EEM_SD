@@ -357,8 +357,8 @@ var eem_keyboard_instruction = {
                 <h2>回答方法について</h2>
                 <p>画面には「あなた」と「Aさん」の2人が受け取る金額の組み合わせが2つ提示されます。</p>
                 <p>あなたは、左右の選択肢のうち、<strong>自分がより好ましいと思う方</strong>を選んでください。</p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <img src="${repo_site}image/key_instruction.png" style="max-width: 80%; height: auto;">
+                <div style="text-align: center; margin: 15px 0;">
+                    <img src="${repo_site}image/key_instruction.png" style="max-width: 60%; max-height: 25vh; width: auto; height: auto; object-fit: contain;">
                 </div>
                 <p style="font-weight: bold;">
                     左側の選択肢を選ぶ場合は <span class="key-label">F</span> キー 、 右側の選択肢を選ぶ場合は <span class="key-label">J</span> キー を押して回答してください。
