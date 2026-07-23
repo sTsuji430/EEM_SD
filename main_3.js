@@ -9,11 +9,16 @@ const intro_pages_3 = [
     `
         <div class="instructions">
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">ここから【課題3】が始まります</h1>
-            <p style="font-size: 20px; line-height: 1.6; font-weight: bold; margin-bottom: 20px;">今から行う課題では、この調査に参加している他の回答者とペアになって課題を行います。</p>
-            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">
-                この課題は全部で <strong>3回（3ラウンド）</strong> 行いますが、<br>
-                <strong>ラウンドごとにそれぞれ異なる3名の方（Bさん、Cさん、Dさん）と新たにペア</strong>になります。
-            </p>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">今から行う課題では、この調査に参加している他の回答者とペアになって課題を行います。</p>
+            
+            <div style="background: #e7f1ff; border-left: 6px solid #0056b3; padding: 18px 25px; border-radius: 8px; margin: 20px 0; text-align: left;">
+                <p style="font-size: 22px; font-weight: bold; color: #0056b3; margin: 0 0 5px 0;">📌 【重要：ペアについて】</p>
+                <p style="font-size: 20px; line-height: 1.6; margin: 0; color: #222;">
+                    この課題は全部で <strong>3回（3ラウンド）</strong> 行いますが、<br>
+                    <span style="background-color: #fff3cd; padding: 2px 8px; border-radius: 4px; font-weight: bold; color: #d9534f; font-size: 22px;">ラウンドごとにそれぞれ異なる3名の方（Bさん、Cさん、Dさん）</span> と新たにペアになります。
+                </p>
+            </div>
+
             <div style="text-align: center; margin: 15px 0;">
                 <img src="${repo_site}image/postmatch_3round.png" style="max-width: 65%; max-height: 28vh; width: auto; height: auto; border: 1px solid #ddd; border-radius: 10px; padding: 5px; box-shadow: 0 3px 8px rgba(0,0,0,0.05);">
             </div>
@@ -23,6 +28,11 @@ const intro_pages_3 = [
     `
         <div class="instructions">
             <h1 style="color: #0056b3; font-size: 32px; text-align: center; border-bottom: 3px solid #0056b3; padding-bottom: 15px; margin-bottom: 30px;">基本ルール（ポイントの受け渡し）</h1>
+            
+            <div style="background: #e7f1ff; border: 2px solid #0056b3; border-radius: 8px; padding: 12px 20px; margin-bottom: 20px; font-size: 18px; color: #0056b3; font-weight: bold;">
+                📌 【再確認】全3ラウンドでそれぞれ異なる3名の方（Bさん、Cさん、Dさん）とペアになります。
+            </div>
+
             <p style="font-weight: bold; font-size: 22px; color: #333; margin-bottom: 10px;">【基本ルール】</p>
             <ul style="line-height: 1.8; font-size: 19px; background: #f8f9fa; padding: 20px 20px 20px 40px; border-radius: 8px; border: 2px solid #ccc; list-style-type: disc;">
                 <li>あなたと相手には、ラウンドの最初にそれぞれ<strong>「200円」</strong>の元手が与えられます。</li>
