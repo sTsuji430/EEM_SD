@@ -445,10 +445,17 @@ const matrix_trial = {
     },
     choices: ['f', 'j'],
     trial_duration: 30000,
-    data: {
-        task: 'response',
-        game: jsPsych.timelineVariable('game'),
-        swap_lr: jsPsych.timelineVariable('swap_lr')
+    data: function () {
+        return {
+            task: 'response',
+            game: jsPsych.timelineVariable('game'),
+            mult_self_c: jsPsych.timelineVariable('mult_self').c,
+            mult_self_m: jsPsych.timelineVariable('mult_self').m,
+            mult_other_c: jsPsych.timelineVariable('mult_other').c,
+            mult_other_m: jsPsych.timelineVariable('mult_other').m,
+            swap_lr: jsPsych.timelineVariable('swap_lr'),
+            block_type: jsPsych.timelineVariable('block_type')
+        };
     },
     on_start: function () {
         document.body.classList.add('hide-cursor');
