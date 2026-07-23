@@ -1,7 +1,7 @@
 // =========================================================
 // main_3.js
 // 3回連続値スライダーPD課題タイムライン & init
-// (cond='3' の場合のタイムライン: 元手200円, 10円刻み, 初期値なしアンカリング防止ハイブリッド, 2段階確定ポップアウト)
+// (cond='3' の場合のタイムライン: 元手200円, 10円刻み, 初期値なしアンカリング防止ハイブリッド, Enter無効化, 2段階確定ポップアウト)
 // =========================================================
 
 // --- 1. 3回PD課題の教示画面 (スモールステップ化) ---
@@ -103,7 +103,7 @@ const intro_pages_3 = [
             <div style="background: #e7f1ff; border: 2px solid #0056b3; padding: 15px 20px; border-radius: 8px; margin: 20px 0; font-size: 18px; line-height: 1.6;">
                 💡 <strong>【回答の進め方】</strong><br>
                 最初は金額が<strong>「未選択」</strong>になっています。<br>
-                スライダーを動かすか、右側の入力欄に数字を直接入力して回答してください（未選択のままでは進めません）。
+                スライダーを動かすか、右側の入力欄に半角数字を直接入力して回答してください（未選択のままでは進めません）。
             </div>
             <p style="color: #dc3545; font-weight: bold; font-size: 19px; padding: 12px; border: 2px solid #dc3545; border-radius: 8px; background: #fff3f3; margin: 20px 0;">
                 なお、ペアとなる相手は完全に匿名であり、実験中に「相手が何を選んだか」といった結果は画面上には提示されません。<br>
@@ -132,7 +132,7 @@ const shuffled_multipliers = jsPsych.randomization.shuffle(raw_multipliers);
 // 相手のネーミング (Bさん、Cさん、Dさん)
 const partner_names = ["Bさん", "Cさん", "Dさん"];
 
-// --- 3. 各試行（完全無バイアス未選択隠蔽 ＆ スムーズキー入力）の構築 ---
+// --- 3. 各試行（完全無バイアス未選択隠蔽 ＆ スムーズキー入力 ＆ Enter無効化）の構築 ---
 shuffled_multipliers.forEach(function (mult, index) {
     const round_num = index + 1;
     const partner_name = partner_names[index];
@@ -282,8 +282,21 @@ shuffled_multipliers.forEach(function (mult, index) {
 
             var isPredSelected = false;
             var isChoiceSelected = false;
+            window.isModalApprovedSubmit = false;
 
-            // --- 連動＆完全アンカリングフリー制御 ---
+            // --- フォームの Enter 送信を物理的に100%遮断 ---
+            var mainForm = document.querySelector('form');
+            if (mainForm) {
+                mainForm.addEventListener('submit', function(e) {
+                    if (!window.isModalApprovedSubmit) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                });
+            }
+
+            // --- 連動＆完全アンカリングフリー制御 ＆ 数字以外の入力禁止 ---
             function setupNoDefaultSync(type) {
                 var range = document.getElementById(type + '_range');
                 var num = document.getElementById(type + '_num');
@@ -320,20 +333,32 @@ shuffled_multipliers.forEach(function (mult, index) {
                     activateInput(range.value);
                 });
 
-                // 2. キーボード直接入力時（打っている途中に勝手に0に丸めない！）
+                // 2. キーボード入力制限：Enterキーで送信しない、マイナスや記号は物理的に受け付けない
+                num.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        num.blur();
+                        return false;
+                    }
+                    // マイナス(-), プラス(+), 指数(e/E), 小数点(.) をキー入力遮断
+                    if (['-', '+', 'e', 'E', '.'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                });
+
+                // 3. キーボード直接入力時
                 num.addEventListener('input', function() {
                     var valStr = num.value;
                     if (valStr === '') return;
                     
                     var val = parseInt(valStr, 10);
                     if (!isNaN(val)) {
-                        // 画面上のスライダー位置のみ動的追従
                         range.value = val;
                         activateInput(val);
                     }
                 });
 
-                // 3. 入力完了後（フォーカスが外れた時 / Enterを押した時）に最終補正
+                // 4. 入力完了後（フォーカス移動時）に最終補正
                 num.addEventListener('change', function() {
                     var valStr = num.value;
                     if (valStr === '') return;
@@ -401,6 +426,7 @@ shuffled_multipliers.forEach(function (mult, index) {
 
             if (modalConfirmBtn) {
                 modalConfirmBtn.addEventListener('click', function() {
+                    window.isModalApprovedSubmit = true;
                     if (modalContainer) {
                         modalContainer.style.display = 'none';
                         if (modalContainer.parentNode) {
@@ -426,8 +452,11 @@ shuffled_multipliers.forEach(function (mult, index) {
                 modalContainer.parentNode.removeChild(modalContainer);
             }
             const resp = data.response || {};
-            data.prediction_value = parseInt(resp.prediction || 0, 10);
-            data.choice_value = parseInt(resp.choice || 0, 10);
+            var predVal = parseInt(resp.prediction, 10);
+            var choiceVal = parseInt(resp.choice, 10);
+
+            data.prediction_value = isNaN(predVal) ? 0 : predVal;
+            data.choice_value = isNaN(choiceVal) ? 0 : choiceVal;
             data.condition_multiplier = mult;
         }
     };
